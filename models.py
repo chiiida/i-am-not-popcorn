@@ -1,38 +1,95 @@
 import arcade.key
+import time
 
-MOVEMENT_SPEED = 4
+MOVEMENT_SPEED = 5
 
 DIR_STILL = 0
 DIR_UP = 1
 DIR_RIGHT = 2
-DIR_DOWN = 3
 DIR_LEFT = 4
  
 DIR_OFFSETS = { DIR_STILL: (0,0),
                 DIR_UP: (0,1),
                 DIR_RIGHT: (1,0),
-                DIR_DOWN: (0,-1),
                 DIR_LEFT: (-1,0) }
 
-KEY_MAP = { arcade.key.UP: DIR_UP,
-            arcade.key.DOWN: DIR_DOWN,
-            arcade.key.LEFT: DIR_LEFT,
-            arcade.key.RIGHT: DIR_RIGHT, }
+JUMP_SPEED = 23
+GRAVITY = -1
 
-class MrCorn:
-    SPRITE_SCALING = 0.5
-
-    MOVEMENT_SPEED = 5 * SPRITE_SCALING
-    JUMP_SPEED = 28 * SPRITE_SCALING
-    GRAVITY = .9 * SPRITE_SCALING
-
-    def __init__(self, world, x, y):
+class Model:
+    def __init__(self, world, x, y, angle):
         self.world = world
         self.x = x
         self.y = y
+        self.angle = 0
+
+class MrCorn(Model):
+    def __init__(self, world, x, y):
+        super().__init__(world, x, y, 0)
+        self.vx = 0
+        self.vy = 0
+        self.direction = DIR_STILL
+        self.is_jump = False
+        self.platform = None
     
+    def move(self, direction):
+        self.x += MOVEMENT_SPEED * DIR_OFFSETS[direction][0]
+        self.y += MOVEMENT_SPEED * DIR_OFFSETS[direction][1]
+    
+    def jump(self):
+        if not self.is_jump:
+            self.is_jump = True
+            self.vy = JUMP_SPEED
+
     def update(self, delta):
-        pass
+        self.move(self.direction)
+        
+        if self.is_jump:
+            self.y += self.vy
+            self.vy += GRAVITY
+
+            new_platform = self.find_touching_platform()
+            if new_platform:
+                self.vy = 0
+                self.set_platform(new_platform)
+        else:
+            if (self.platform) and (not self.is_on_platform(self.platform)):
+                self.platform = None
+                self.is_jump = True
+                self.vy = 0
+    
+    def bottom(self):
+        return self.y - 100
+    
+    def set_platform(self, platform):
+        self.is_jump = False
+        self.platform = platform
+        self.y = platform.y + 100
+
+    def is_on_platform(self, platform):
+        if not platform.in_top_range(self.x):
+            return False
+        
+        if abs(platform.y - self.bottom()) <= 100:
+            return True
+
+        return False
+    
+    def is_falling_on_platform(self, platform):
+        if not platform.in_top_range(self.x):
+            return False
+        
+        if self.bottom() - self.vy > platform.y > self.bottom():
+            return True
+        
+        return False
+
+    def find_touching_platform(self):
+        floor = self.world.floor_list
+        for f in floor:
+            if self.is_falling_on_platform(f):
+                return f
+        return None
 
 class Fire:
     def __init__(self, world, x, y):
@@ -40,32 +97,56 @@ class Fire:
         self.x = x
         self.y = y
     
+    def move(self):
+        for y in range(50, self.x, 25):
+            fire = arcade.Sprite('images/fire.png')
+            fire.center_x = 50
+            fire.center_y = y
+            time.sleep(5)
+
     def update(self, delta):
         pass
 
-class Floor:
-    def __init__(self, world, x, y):
+class Platform:
+    def __init__(self, world, x, y, width, height):
         self.world = world
         self.x = x
         self.y = y
-        self.floor_list = arcade.SpriteList()
-    
-    def draw(self):
-        for x in range(50, self.y, 50):
-            floor = arcade.Sprite('images/platforms/lv1_2.png')
-            floor.center_x = x
-            floor.center_y = 50
-            self.floor_list.append(floor)
-        
-        self.floor_list.draw()
+        self.width = width
+        self.height = height
+
+    def in_top_range(self, x):
+        return self.x <= x <= self.x + self.width
+
+    def right_most_x(self):
+        return self.x + self.width
 
 class World:
     def __init__(self, width, height):
         self.width = width
         self.height = height
 
-        self.mrcorn = MrCorn(self, 100, 100)
-        self.floor = Floor(self, width, height)
+        self.mrcorn = MrCorn(self, 50, 150)
+        self.init_floor()
+        self.fire = Fire(self, width//2, 50)
+
+    def init_floor(self):
+        self.floor_list = []
+        for x in range(50, self.width, 50):
+            floor = Platform(self, x, 50, 100, 100)
+            self.floor_list.append(floor)
+
+    def on_key_press(self, key, modifiers):
+        if key == arcade.key.UP:
+            self.mrcorn.jump()
+        elif key == arcade.key.LEFT:
+            self.mrcorn.direction = DIR_LEFT
+        elif key == arcade.key.RIGHT:
+            self.mrcorn.direction = DIR_RIGHT
     
+    def on_key_release(self, key, modifiers):
+        if key == arcade.key.LEFT or key == arcade.key.RIGHT:
+            self.mrcorn.direction = DIR_STILL
+
     def update(self, delta):
         self.mrcorn.update(delta)
