@@ -41,7 +41,7 @@ class ImNotPopcorn(arcade.Window):
             f.draw()
     
     def draw_platforms(self, platforms, level):
-        for platform in platforms:
+        for platform in platforms[1:]:
             for each in platform:
                 p = ModelSprite(f'images/platforms/lv{level}_5.png', model=each)
                 p.draw()

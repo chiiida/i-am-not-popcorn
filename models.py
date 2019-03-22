@@ -18,7 +18,7 @@ GRAVITY = -1
 
 lv1_platform = [[2, 300, 225],
                 [1, 100, 325],
-                [2, 200, 425],
+                [2, 400, 425],
                 [1, 150, 525],
                 [2, 400, 625]]
 
@@ -137,7 +137,7 @@ class World:
         self.init_floor()
         self.fire = Fire(self, width//2, 50)
         self.platforms = self.gen_platform(lv1_platform)
-        self.platforms.append(self.floor_list)
+        self.platforms.insert(0, self.floor_list)
 
     def init_floor(self):
         self.floor_list = []
