@@ -16,8 +16,11 @@ DIR_OFFSETS = { DIR_STILL: (0,0),
 JUMP_SPEED = 25
 GRAVITY = -1
 
-lv1_platform = [[2, 100, 225],
-                [1, 300, 400]]
+lv1_platform = [[2, 300, 225],
+                [1, 100, 325],
+                [2, 200, 425],
+                [1, 150, 525],
+                [2, 400, 625]]
 
 class Model:
     def __init__(self, world, x, y, angle):
@@ -88,10 +91,11 @@ class MrCorn(Model):
         return False
 
     def find_touching_platform(self):
-        floor = self.world.floor_list
-        for f in floor:
-            if self.is_falling_on_platform(f):
-                return f
+        platforms = self.world.platforms
+        for platform in platforms:
+            for p in platform:
+                if self.is_falling_on_platform(p):
+                    return p
         return None
 
 class Fire:
@@ -133,6 +137,7 @@ class World:
         self.init_floor()
         self.fire = Fire(self, width//2, 50)
         self.platforms = self.gen_platform(lv1_platform)
+        self.platforms.append(self.floor_list)
 
     def init_floor(self):
         self.floor_list = []
@@ -144,10 +149,10 @@ class World:
         self.platforms = []
         for platform_list in platforms_array:
             platform = []
-            for x in range(platform_list[1], 100*(platform_list[0]+1), 100):
+            for x in range(platform_list[1], (100+platform_list[1])+1, 100):
                 each = Platform(self, x, platform_list[2], 100, 100)
                 platform.append(each)
-            self.platforms.append(platform)
+            self.platforms.append(platform[:platform_list[0]])
         return self.platforms
     
     def on_key_press(self, key, modifiers):
