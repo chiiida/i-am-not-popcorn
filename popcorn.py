@@ -29,25 +29,25 @@ class ImNotPopcorn(arcade.Window):
     def __init__(self, width, height, title):
         super().__init__(width, height, title)
 
-        arcade.set_background_color(arcade.color.WHITE)
         self.background = arcade.load_texture("images/bg.png")
         
         self.world = World(SCREEN_WIDTH, SCREEN_HEIGHT)
         self.mrcorn_sprite = ModelSprite('images/mrcorn.png', model=self.world.mrcorn)
         self.world.mrcorn_sprite = self.mrcorn_sprite
-        #self.physics_engine = \
-        #    arcade.PhysicsEnginePlatformer(self.world.mrcorn_sprite,
-        #                                   self.floor.floor_list,
-        #                                   gravity_constant=GRAVITY)
 
-    def draw_floor(self, floor_list):
+    def draw_floor(self, floor_list, level):
         for floor in floor_list:
-            f = ModelSprite('images/platforms/lv1_2.png', model=floor)
+            f = ModelSprite(f'images/platforms/lv{level}_2.png', model=floor)
             f.draw()
+    
+    def draw_platforms(self, platforms, level):
+        for platform in platforms:
+            for each in platform:
+                p = ModelSprite(f'images/platforms/lv{level}_5.png', model=each)
+                p.draw()
 
     def update(self, delta):
         self.world.update(delta)
-        #self.physics_engine.update()
     
     def on_key_press(self, key, key_modifiers):
         self.world.on_key_press(key, key_modifiers)
@@ -59,8 +59,8 @@ class ImNotPopcorn(arcade.Window):
         arcade.start_render()
         arcade.draw_texture_rectangle(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2,
                                       SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
-        #self.floor.draw()
-        self.draw_floor(self.world.floor_list)
+        self.draw_floor(self.world.floor_list, 1)
+        self.draw_platforms(self.world.platforms, 1)
         self.mrcorn_sprite.draw()
 
 def main():

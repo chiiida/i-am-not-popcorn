@@ -13,8 +13,11 @@ DIR_OFFSETS = { DIR_STILL: (0,0),
                 DIR_RIGHT: (1,0),
                 DIR_LEFT: (-1,0) }
 
-JUMP_SPEED = 23
+JUMP_SPEED = 25
 GRAVITY = -1
+
+lv1_platform = [[2, 100, 225],
+                [1, 300, 400]]
 
 class Model:
     def __init__(self, world, x, y, angle):
@@ -129,13 +132,24 @@ class World:
         self.mrcorn = MrCorn(self, 50, 150)
         self.init_floor()
         self.fire = Fire(self, width//2, 50)
+        self.platforms = self.gen_platform(lv1_platform)
 
     def init_floor(self):
         self.floor_list = []
-        for x in range(50, self.width, 50):
+        for x in range(50, self.width, 100):
             floor = Platform(self, x, 50, 100, 100)
             self.floor_list.append(floor)
 
+    def gen_platform(self, platforms_array):
+        self.platforms = []
+        for platform_list in platforms_array:
+            platform = []
+            for x in range(platform_list[1], 100*(platform_list[0]+1), 100):
+                each = Platform(self, x, platform_list[2], 100, 100)
+                platform.append(each)
+            self.platforms.append(platform)
+        return self.platforms
+    
     def on_key_press(self, key, modifiers):
         if key == arcade.key.UP:
             self.mrcorn.jump()
