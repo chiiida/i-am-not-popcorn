@@ -13,7 +13,7 @@ DIR_OFFSETS = { DIR_STILL: (0,0),
                 DIR_RIGHT: (1,0),
                 DIR_LEFT: (-1,0) }
 
-JUMP_SPEED = 25
+JUMP_SPEED = 20
 GRAVITY = -1
 
 lv1_platform = [[2, 300, 225],
@@ -64,6 +64,9 @@ class MrCorn(Model):
                 self.is_jump = True
                 self.vy = 0
     
+    def top(self):
+        return self.y + 100
+
     def bottom(self):
         return self.y - 100
     
@@ -76,7 +79,7 @@ class MrCorn(Model):
         if not platform.in_top_range(self.x):
             return False
         
-        if abs(platform.y - self.bottom()) <= 100:
+        if abs(platform.y - self.bottom()) <= 50:
             return True
 
         return False
@@ -156,7 +159,7 @@ class World:
         return self.platforms
     
     def on_key_press(self, key, modifiers):
-        if key == arcade.key.UP:
+        if key == arcade.key.SPACE:
             self.mrcorn.jump()
         elif key == arcade.key.LEFT:
             self.mrcorn.direction = DIR_LEFT

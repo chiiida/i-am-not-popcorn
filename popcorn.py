@@ -5,11 +5,7 @@ SCREEN_WIDTH = 700
 SCREEN_HEIGHT = 800
 SCREEN_TITLE = 'I AM NOT POPCORN!'
 
-SPRITE_SCALING = 0.5
-
-MOVEMENT_SPEED = 5 * SPRITE_SCALING
-JUMP_SPEED = 28 * SPRITE_SCALING
-GRAVITY = .9 * SPRITE_SCALING
+VIEWPORT_MARGIN = 40
 
 class ModelSprite(arcade.Sprite):
     def __init__(self, *args, **kwargs):
@@ -20,7 +16,10 @@ class ModelSprite(arcade.Sprite):
     def sync_with_model(self):
         if self.model:
             self.set_position(self.model.x, self.model.y)
- 
+    
+    def top(self):
+        return self.model.y + 100
+
     def draw(self):
         self.sync_with_model()
         super().draw()
@@ -30,6 +29,7 @@ class ImNotPopcorn(arcade.Window):
         super().__init__(width, height, title)
 
         self.background = arcade.load_texture("images/bg.png")
+        self.view_bottom = 0
         
         self.world = World(SCREEN_WIDTH, SCREEN_HEIGHT)
         self.mrcorn_sprite = ModelSprite('images/mrcorn.png', model=self.world.mrcorn)
@@ -47,7 +47,17 @@ class ImNotPopcorn(arcade.Window):
                 p.draw()
 
     def update(self, delta):
+        changed = False
         self.world.update(delta)
+
+        top_bndry = self.view_bottom + SCREEN_HEIGHT - VIEWPORT_MARGIN
+        if self.mrcorn_sprite.top() > top_bndry:
+            self.view_bottom += self.mrcorn_sprite.top() - top_bndry
+            changed = True
+
+        if changed:
+            arcade.set_viewport(0, 0 + SCREEN_WIDTH, self.view_bottom, 
+                                SCREEN_HEIGHT + self.view_bottom)
     
     def on_key_press(self, key, key_modifiers):
         self.world.on_key_press(key, key_modifiers)
@@ -70,3 +80,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+arcade.Sprite
