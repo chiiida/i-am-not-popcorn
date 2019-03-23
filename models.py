@@ -1,5 +1,6 @@
 import arcade.key
 import time
+from map_lv1 import *
 
 MOVEMENT_SPEED = 5
 
@@ -15,14 +16,6 @@ DIR_OFFSETS = { DIR_STILL: (0,0),
 
 JUMP_SPEED = 20
 GRAVITY = -1
-
-lv1_platform = [[2, 300, 225],
-                [1, 100, 325],
-                [2, 400, 425],
-                [1, 150, 525],
-                [2, 400, 625],
-                [2, 150, 725],
-                [1, 300, 825]]
 
 class Model:
     def __init__(self, world, x, y, angle):
