@@ -28,7 +28,7 @@ class ImNotPopcorn(arcade.Window):
     def __init__(self, width, height, title):
         super().__init__(width, height, title)
 
-        self.background = arcade.load_texture("images/bg.png")
+        self.background = arcade.load_texture("images/bg2.png")
         self.view_bottom = 0
         
         self.world = World(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -67,8 +67,8 @@ class ImNotPopcorn(arcade.Window):
 
     def on_draw(self):
         arcade.start_render()
-        arcade.draw_texture_rectangle(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2,
-                                      SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
+        arcade.draw_texture_rectangle(SCREEN_WIDTH // 2, 2000 // 2,
+                                      SCREEN_WIDTH, 2000, self.background)
         self.draw_floor(self.world.floor_list, 1)
         self.draw_platforms(self.world.platforms, 1)
         self.mrcorn_sprite.draw()
