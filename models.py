@@ -1,5 +1,4 @@
 import arcade.key
-import time
 from map_lv1 import *
 
 MOVEMENT_SPEED = 5
@@ -54,7 +53,7 @@ class MrCorn(Model):
                 self.vy = 0
                 self.set_platform(new_platform)
         else:
-            if (self.platform) and (not self.is_on_platform(self.platform)):
+            if (self.platform) and (not self.is_on_platform(self.platform)) and (not self.top_touch_platform(self.platform)):
                 self.platform = None
                 self.is_jump = True
                 self.vy = 0
@@ -64,6 +63,12 @@ class MrCorn(Model):
 
     def bottom(self):
         return self.y - 100
+    
+    def left(self):
+        return self.x - 25
+    
+    def right(self):
+        return self.x + 25
     
     def set_platform(self, platform):
         self.is_jump = False
@@ -94,23 +99,31 @@ class MrCorn(Model):
             for p in platform:
                 if self.is_falling_on_platform(p):
                     return p
-        return None
+
+    def top_touch_platform(self, platform):
+        if not platform.in_bottom_range(self.x):
+            return False
+        
+        if self.top() - self.vy < platform.y < self.top():
+            return True
+        
+        return False
+    
+    def find_top_touching(self):
+        platforms = self.world.platforms
+        for platform in platforms:
+            for p in platform:
+                if self.top_touch_platform(p):
+                    return p
 
 class Fire:
     def __init__(self, world, x, y):
         self.world = world
         self.x = x
         self.y = y
-    
-    def move(self):
-        for y in range(50, self.x, 25):
-            fire = arcade.Sprite('images/fire.png')
-            fire.center_x = 50
-            fire.center_y = y
-            time.sleep(5)
 
     def update(self, delta):
-        pass
+        self.y += 1
 
 class Platform:
     def __init__(self, world, x, y, width, height):
@@ -123,8 +136,8 @@ class Platform:
     def in_top_range(self, x):
         return self.x <= x <= self.x + self.width
 
-    def right_most_x(self):
-        return self.x + self.width
+    def in_bottom_range(self, x):
+        return self.x >= x >= self.x + self.width
 
 class World:
     def __init__(self, width, height):
@@ -133,7 +146,7 @@ class World:
 
         self.mrcorn = MrCorn(self, 50, 150)
         self.init_floor()
-        self.fire = Fire(self, width//2, 50)
+        self.fire = Fire(self, width//2, -700)
         self.platforms = self.gen_platform(lv1_platform)
         self.platforms.insert(0, self.floor_list)
 
@@ -167,3 +180,9 @@ class World:
 
     def update(self, delta):
         self.mrcorn.update(delta)
+        self.fire.update(delta)
+
+        if self.mrcorn.left() <= 0:
+            self.mrcorn.direction = DIR_STILL
+        elif self.mrcorn.right() >= 700:
+            self.mrcorn.direction = DIR_STILL

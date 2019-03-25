@@ -1,5 +1,6 @@
 import arcade
 from models import World, MrCorn
+import time
 
 SCREEN_WIDTH = 700
 SCREEN_HEIGHT = 800
@@ -33,7 +34,8 @@ class ImNotPopcorn(arcade.Window):
         
         self.world = World(SCREEN_WIDTH, SCREEN_HEIGHT)
         self.mrcorn_sprite = ModelSprite('images/mrcorn.png', model=self.world.mrcorn)
-        self.world.mrcorn_sprite = self.mrcorn_sprite
+        self.fire_sprite = ModelSprite('images/fire.png', model=self.world.fire)
+
 
     def draw_floor(self, floor_list, level):
         for floor in floor_list:
@@ -45,7 +47,14 @@ class ImNotPopcorn(arcade.Window):
             for each in platform:
                 p = ModelSprite(f'images/platforms/lv{level}_5.png', model=each)
                 p.draw()
-
+    
+    def draw_fire(self, fire):
+        for y in range(50, 500, 25):
+            fire.x = 50
+            fire.y = y
+            fire.draw()
+            time.sleep(1/60)
+            
     def update(self, delta):
         changed = False
         self.world.update(delta)
@@ -72,6 +81,7 @@ class ImNotPopcorn(arcade.Window):
         self.draw_floor(self.world.floor_list, 1)
         self.draw_platforms(self.world.platforms, 1)
         self.mrcorn_sprite.draw()
+        self.fire_sprite.draw()
 
 def main():
     window = ImNotPopcorn(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
@@ -80,5 +90,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-arcade.Sprite
