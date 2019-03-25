@@ -139,6 +139,15 @@ class Platform:
     def in_bottom_range(self, x):
         return self.x >= x >= self.x + self.width
 
+class Coin:
+    def __init__(self, world, x, y):
+        self.world = world
+        self.x = x
+        self.y = y
+    
+    def update(self, delta):
+        pass
+
 class World:
     def __init__(self, width, height):
         self.width = width
@@ -147,8 +156,9 @@ class World:
         self.mrcorn = MrCorn(self, 50, 150)
         self.init_floor()
         self.fire = Fire(self, width//2, -700)
-        self.platforms = self.gen_platform(lv1_platform)
+        self.platforms = self.gen_platform(lv1_platforms)
         self.platforms.insert(0, self.floor_list)
+        self.coins = self.gen_coin(lv1_coins)
 
     def init_floor(self):
         self.floor_list = []
@@ -166,6 +176,13 @@ class World:
             self.platforms.append(platform[:platform_list[0]])
         return self.platforms
     
+    def gen_coin(self, coin_array):
+        self.coins = []
+        for coin in coin_array:
+            c = Coin(self, coin[0], coin[1])
+            self.coins.append(c)
+        return self.coins
+
     def on_key_press(self, key, modifiers):
         if key == arcade.key.SPACE:
             self.mrcorn.jump()

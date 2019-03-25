@@ -54,6 +54,11 @@ class ImNotPopcorn(arcade.Window):
             fire.y = y
             fire.draw()
             time.sleep(1/60)
+    
+    def draw_coin(self, coins):
+        for coin in coins:
+            c = ModelSprite('images/coin.png', model=coin)
+            c.draw()
             
     def update(self, delta):
         changed = False
@@ -80,8 +85,9 @@ class ImNotPopcorn(arcade.Window):
                                       SCREEN_WIDTH, 2000, self.background)
         self.draw_floor(self.world.floor_list, 1)
         self.draw_platforms(self.world.platforms, 1)
+        self.draw_coin(self.world.coins)
         self.mrcorn_sprite.draw()
-        self.fire_sprite.draw()
+        #self.fire_sprite.draw()
 
 def main():
     window = ImNotPopcorn(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
