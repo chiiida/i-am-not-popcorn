@@ -16,7 +16,7 @@ DIR_OFFSETS = { DIR_STILL: (0,0),
 JUMP_SPEED = 20
 GRAVITY = -1
 
-COIN_HIT_MARGIN = 50
+COIN_HIT_MARGIN = 30
 
 class Model:
     def __init__(self, world, x, y, angle):

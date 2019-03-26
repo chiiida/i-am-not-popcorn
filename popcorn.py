@@ -118,7 +118,7 @@ class ImNotPopcorn(arcade.Window):
         self.draw_platforms(self.world.platforms, 1)
         self.draw_coin(self.world.coins)
         self.mrcorn_sprite.draw()
-        #self.fire_sprite.draw()
+        self.fire_sprite.draw()
 
 def main():
     window = ImNotPopcorn(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
