@@ -1,5 +1,6 @@
 import arcade
 from models import World, MrCorn
+import random
 import time
 
 SCREEN_WIDTH = 700
@@ -25,6 +26,25 @@ class ModelSprite(arcade.Sprite):
         self.sync_with_model()
         super().draw()
 
+class AnimatedSprite(arcade.AnimatedTimeSprite):
+    def __init__(self, *args, **kwargs):
+        self.model = kwargs.pop('model', None)
+        self.textures = []
+        self.cur_texture_index = 0
+
+        super().__init__(*args, **kwargs)
+    
+    def sync_with_model(self):
+        if self.model:
+            self.center_x = self.model.x
+            self.center_y = self.model.y
+
+    def add_textures(self, texture):
+        self.textures.append(arcade.load_texture(texture))
+    
+    def set_cur(self):
+        self.cur_texture_index = random.randrange(len(self.textures))
+
 class ImNotPopcorn(arcade.Window):
     def __init__(self, width, height, title):
         super().__init__(width, height, title)
@@ -35,6 +55,7 @@ class ImNotPopcorn(arcade.Window):
         self.world = World(SCREEN_WIDTH, SCREEN_HEIGHT)
         self.mrcorn_sprite = ModelSprite('images/mrcorn.png', model=self.world.mrcorn)
         self.fire_sprite = ModelSprite('images/fire.png', model=self.world.fire)
+        self.coin_list = arcade.SpriteList()
 
 
     def draw_floor(self, floor_list, level):
@@ -56,9 +77,19 @@ class ImNotPopcorn(arcade.Window):
             time.sleep(1/60)
     
     def draw_coin(self, coins):
+        # for coin in coins:
+        #     c = AnimatedSprite(model=coin)
+        #     c.add_textures('images/coin/coin1.png')
+        #     c.add_textures('images/coin/coin2.png')
+        #     c.add_textures('images/coin/coin3.png')
+        #     c.add_textures('images/coin/coin4.png')
+        #     self.coin_list.append(c)
+        #self.coin_list.draw()
+
         for coin in coins:
             c = ModelSprite('images/coin.png', model=coin)
             c.draw()
+
             
     def update(self, delta):
         changed = False

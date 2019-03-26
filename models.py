@@ -16,6 +16,8 @@ DIR_OFFSETS = { DIR_STILL: (0,0),
 JUMP_SPEED = 20
 GRAVITY = -1
 
+COIN_HIT_MARGIN = 50
+
 class Model:
     def __init__(self, world, x, y, angle):
         self.world = world
@@ -31,6 +33,7 @@ class MrCorn(Model):
         self.direction = DIR_STILL
         self.is_jump = False
         self.platform = None
+        self.coin_point = 0
     
     def move(self, direction):
         self.x += MOVEMENT_SPEED * DIR_OFFSETS[direction][0]
@@ -53,7 +56,8 @@ class MrCorn(Model):
                 self.vy = 0
                 self.set_platform(new_platform)
         else:
-            if (self.platform) and (not self.is_on_platform(self.platform)) and (not self.top_touch_platform(self.platform)):
+            if (self.platform) and (not self.is_on_platform(self.platform))\
+                 and (not self.top_touch_platform(self.platform)):
                 self.platform = None
                 self.is_jump = True
                 self.vy = 0
@@ -134,7 +138,7 @@ class Platform:
         self.height = height
 
     def in_top_range(self, x):
-        return self.x <= x <= self.x + self.width
+        return self.x - self.width//2 <= x <= self.x + self.width//2
 
     def in_bottom_range(self, x):
         return self.x >= x >= self.x + self.width
@@ -144,6 +148,11 @@ class Coin:
         self.world = world
         self.x = x
         self.y = y
+        self.is_collected = False
+    
+    def collected(self, mrcorn):
+        return ((abs(self.x - mrcorn.x) < COIN_HIT_MARGIN) and
+                (abs(self.y - mrcorn.y) < COIN_HIT_MARGIN))
     
     def update(self, delta):
         pass
@@ -155,7 +164,7 @@ class World:
 
         self.mrcorn = MrCorn(self, 50, 150)
         self.init_floor()
-        self.fire = Fire(self, width//2, -700)
+        self.fire = Fire(self, width//2, -1000)
         self.platforms = self.gen_platform(lv1_platforms)
         self.platforms.insert(0, self.floor_list)
         self.coins = self.gen_coin(lv1_coins)
@@ -170,7 +179,7 @@ class World:
         self.platforms = []
         for platform_list in platforms_array:
             platform = []
-            for x in range(platform_list[1], (100+platform_list[1])+1, 100):
+            for x in range(platform_list[1], platform_list[0]*platform_list[1]+1, 100):
                 each = Platform(self, x, platform_list[2], 100, 100)
                 platform.append(each)
             self.platforms.append(platform[:platform_list[0]])
@@ -182,6 +191,18 @@ class World:
             c = Coin(self, coin[0], coin[1])
             self.coins.append(c)
         return self.coins
+    
+    def collect_coins(self):
+        for c in self.coins:
+            if not c.is_collected and c.collected(self.mrcorn):
+                c.is_collected = True
+                self.mrcorn.coin_point += 100
+    
+    def kill_coin(self):
+        for c in self.coins:
+            if c.is_collected == True:
+                index = self.coins.index(c)
+                self.coins.pop(index)
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.SPACE:
@@ -198,6 +219,8 @@ class World:
     def update(self, delta):
         self.mrcorn.update(delta)
         self.fire.update(delta)
+        self.collect_coins()
+        self.kill_coin()
 
         if self.mrcorn.left() <= 0:
             self.mrcorn.direction = DIR_STILL
