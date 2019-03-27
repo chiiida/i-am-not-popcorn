@@ -33,7 +33,6 @@ class MrCorn(Model):
         self.direction = DIR_STILL
         self.is_jump = False
         self.platform = None
-        self.coin_point = 0
     
     def move(self, direction):
         self.x += MOVEMENT_SPEED * DIR_OFFSETS[direction][0]
@@ -121,10 +120,15 @@ class MrCorn(Model):
                     return p
 
 class Fire:
-    def __init__(self, world, x, y):
+    def __init__(self, world, x, y, width, height):
         self.world = world
         self.x = x
         self.y = y
+        self.width = width
+        self.height = height
+    
+    def top(self):
+        return self.y + self.height//2
 
     def update(self, delta):
         self.y += 1
@@ -158,16 +162,20 @@ class Coin:
         pass
 
 class World:
+    START = 0
+    DEAD = 1
     def __init__(self, width, height):
         self.width = width
         self.height = height
+        self.state = World.START
 
         self.mrcorn = MrCorn(self, 50, 150)
         self.init_floor()
-        self.fire = Fire(self, width//2, -1000)
+        self.fire = Fire(self, self.width//2, -500, 700, 800)
         self.platforms = self.gen_platform(lv1_platforms)
         self.platforms.insert(0, self.floor_list)
         self.coins = self.gen_coin(lv1_coins)
+        self.coin_point = 0
 
     def init_floor(self):
         self.floor_list = []
@@ -196,13 +204,17 @@ class World:
         for c in self.coins:
             if not c.is_collected and c.collected(self.mrcorn):
                 c.is_collected = True
-                self.mrcorn.coin_point += 100
+                self.coin_point += 100
     
     def kill_coin(self):
         for c in self.coins:
             if c.is_collected == True:
                 index = self.coins.index(c)
                 self.coins.pop(index)
+    
+    def is_dead(self):
+        if self.mrcorn.bottom()+50 < self.fire.top():
+            self.state = World.DEAD
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.SPACE:
@@ -217,12 +229,9 @@ class World:
             self.mrcorn.direction = DIR_STILL
 
     def update(self, delta):
-        self.mrcorn.update(delta)
-        self.fire.update(delta)
-        self.collect_coins()
-        self.kill_coin()
-
-        if self.mrcorn.left() <= 0:
-            self.mrcorn.direction = DIR_STILL
-        elif self.mrcorn.right() >= 700:
-            self.mrcorn.direction = DIR_STILL
+        self.is_dead()
+        if self.state == World.START:
+            self.mrcorn.update(delta)
+            self.fire.update(delta)
+            self.collect_coins()
+            self.kill_coin()

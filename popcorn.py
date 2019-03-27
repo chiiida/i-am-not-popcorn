@@ -120,6 +120,8 @@ class ImNotPopcorn(arcade.Window):
         self.mrcorn_sprite.draw()
         self.fire_sprite.draw()
 
+        arcade.draw_text(str(self.world.coin_point), SCREEN_WIDTH - 50, SCREEN_HEIGHT - 20, arcade.color.AMERICAN_ROSE, 20)
+
 def main():
     window = ImNotPopcorn(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
     arcade.set_window(window)
