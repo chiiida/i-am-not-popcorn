@@ -65,8 +65,7 @@ class ImNotPopcorn(arcade.Window):
     
     def draw_platforms(self, platforms, level):
         for platform in platforms[1:]:
-            for each in platform:
-                p = ModelSprite(f'images/platforms/lv{level}_5.png', model=each)
+                p = ModelSprite(f'images/platforms/lv{level}_5.png', model=platform)
                 p.draw()
     
     def draw_fire(self, fire):
@@ -114,8 +113,8 @@ class ImNotPopcorn(arcade.Window):
         arcade.start_render()
         arcade.draw_texture_rectangle(SCREEN_WIDTH // 2, 2000 // 2,
                                       SCREEN_WIDTH, 2000, self.background)
-        self.draw_floor(self.world.floor_list, 1)
         self.draw_platforms(self.world.platforms, 1)
+        self.draw_floor(self.world.floor_list, 1)
         self.draw_coin(self.world.coins)
         self.mrcorn_sprite.draw()
         self.fire_sprite.draw()

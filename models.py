@@ -33,6 +33,7 @@ class MrCorn(Model):
         self.direction = DIR_STILL
         self.is_jump = False
         self.platform = None
+        self.top_platform = None
     
     def move(self, direction):
         self.x += MOVEMENT_SPEED * DIR_OFFSETS[direction][0]
@@ -51,13 +52,15 @@ class MrCorn(Model):
             self.vy += GRAVITY
 
             new_platform = self.find_touching_platform()
+            top_platform = self.find_top_touching()
             if new_platform:
                 self.vy = 0
-                self.set_platform(new_platform)
+                self.set_platform(new_platform, top_platform)
         else:
-            if (self.platform) and (not self.is_on_platform(self.platform))\
-                 and (not self.top_touch_platform(self.platform)):
+            if (self.platform) and (not self.is_on_platform(self.platform)) \
+                and (not self.top_touch_platform(self.platform)):
                 self.platform = None
+                self.top_platform = None
                 self.is_jump = True
                 self.vy = 0
     
@@ -73,9 +76,10 @@ class MrCorn(Model):
     def right(self):
         return self.x + 25
     
-    def set_platform(self, platform):
+    def set_platform(self, platform, top_platform):
         self.is_jump = False
         self.platform = platform
+        self.top_platform = top_platform
         self.y = platform.y + 100
 
     def is_on_platform(self, platform):
@@ -98,13 +102,21 @@ class MrCorn(Model):
 
     def find_touching_platform(self):
         platforms = self.world.platforms
-        for platform in platforms:
-            for p in platform:
-                if self.is_falling_on_platform(p):
-                    return p
+        for p in platforms:
+            if self.is_falling_on_platform(p):
+                return p
 
     def top_touch_platform(self, platform):
-        if not platform.in_bottom_range(self.x):
+        if not platform.in_top_range(self.x):
+            return False
+        
+        if abs(platform.y - self.top()) <= 50:
+            return True
+        
+        return False
+    
+    def hit_platform(self, platform):
+        if not platform.in_top_range(self.x):
             return False
         
         if self.top() - self.vy < platform.y < self.top():
@@ -114,10 +126,9 @@ class MrCorn(Model):
     
     def find_top_touching(self):
         platforms = self.world.platforms
-        for platform in platforms:
-            for p in platform:
-                if self.top_touch_platform(p):
-                    return p
+        for p in platforms:
+            if self.hit_platform(p):
+                return p
 
 class Fire:
     def __init__(self, world, x, y, width, height):
@@ -145,7 +156,7 @@ class Platform:
         return self.x - self.width//2 <= x <= self.x + self.width//2
 
     def in_bottom_range(self, x):
-        return self.x >= x >= self.x + self.width
+        return self.x - self.width//2 <= x <= self.x + self.width//2
 
 class Coin:
     def __init__(self, world, x, y):
@@ -170,27 +181,24 @@ class World:
         self.state = World.START
 
         self.mrcorn = MrCorn(self, 50, 150)
-        self.init_floor()
+        self.floor_list = []
         self.fire = Fire(self, self.width//2, -500, 700, 800)
-        self.platforms = self.gen_platform(lv1_platforms)
-        self.platforms.insert(0, self.floor_list)
+        self.platforms = self.gen_map(map_lv1)
         self.coins = self.gen_coin(lv1_coins)
         self.coin_point = 0
-
-    def init_floor(self):
-        self.floor_list = []
-        for x in range(50, self.width, 100):
-            floor = Platform(self, x, 50, 100, 100)
-            self.floor_list.append(floor)
-
-    def gen_platform(self, platforms_array):
+    
+    def gen_map(self, map):
+        map.reverse()
         self.platforms = []
-        for platform_list in platforms_array:
-            platform = []
-            for x in range(platform_list[1], platform_list[0]*platform_list[1]+1, 100):
-                each = Platform(self, x, platform_list[2], 100, 100)
-                platform.append(each)
-            self.platforms.append(platform[:platform_list[0]])
+        for r in range(len(map)):
+            for c in range(len(map[0])):
+                if map[r][c] == '#':
+                    p = Platform(self, (c)*100, (r+1)*100, 100, 100)
+                    self.platforms.append(p)
+                elif map[r][c] == '$':
+                    p = Platform(self, (c)*100, (r+1)*50, 100, 100)
+                    self.floor_list.append(p)
+                    self.platforms.append(p)
         return self.platforms
     
     def gen_coin(self, coin_array):
@@ -213,7 +221,7 @@ class World:
                 self.coins.pop(index)
     
     def is_dead(self):
-        if self.mrcorn.bottom()+50 < self.fire.top():
+        if self.mrcorn.bottom()+70 < self.fire.top():
             self.state = World.DEAD
 
     def on_key_press(self, key, modifiers):
