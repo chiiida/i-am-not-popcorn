@@ -17,6 +17,7 @@ JUMP_SPEED = 20
 GRAVITY = -1
 
 COIN_HIT_MARGIN = 30
+PLAYER_MARGIN = 50
 
 class Model:
     def __init__(self, world, x, y, angle):
@@ -33,7 +34,6 @@ class MrCorn(Model):
         self.direction = DIR_STILL
         self.is_jump = False
         self.platform = None
-        self.top_platform = None
     
     def move(self, direction):
         self.x += MOVEMENT_SPEED * DIR_OFFSETS[direction][0]
@@ -43,26 +43,6 @@ class MrCorn(Model):
         if not self.is_jump:
             self.is_jump = True
             self.vy = JUMP_SPEED
-
-    def update(self, delta):
-        self.move(self.direction)
-        
-        if self.is_jump:
-            self.y += self.vy
-            self.vy += GRAVITY
-
-            new_platform = self.find_touching_platform()
-            top_platform = self.find_top_touching()
-            if new_platform:
-                self.vy = 0
-                self.set_platform(new_platform, top_platform)
-        else:
-            if (self.platform) and (not self.is_on_platform(self.platform)) \
-                and (not self.top_touch_platform(self.platform)):
-                self.platform = None
-                self.top_platform = None
-                self.is_jump = True
-                self.vy = 0
     
     def top(self):
         return self.y + 100
@@ -76,10 +56,9 @@ class MrCorn(Model):
     def right(self):
         return self.x + 25
     
-    def set_platform(self, platform, top_platform):
+    def set_platform(self, platform):
         self.is_jump = False
         self.platform = platform
-        self.top_platform = top_platform
         self.y = platform.y + 100
 
     def is_on_platform(self, platform):
@@ -105,30 +84,31 @@ class MrCorn(Model):
         for p in platforms:
             if self.is_falling_on_platform(p):
                 return p
+    
+    def check_out_of_world(self):
+        if self.x <= PLAYER_MARGIN or self.x - PLAYER_MARGIN >= self.world.width:
+            self.direction = DIR_STILL
+            if self.x <= 0:
+                self.x = PLAYER_MARGIN
+            if self.x >= self.world.width:
+                self.x = self.world.width - PLAYER_MARGIN
+    
+    def update(self, delta):
+        self.move(self.direction)
+        self.check_out_of_world()
+        if self.is_jump:
+            self.y += self.vy
+            self.vy += GRAVITY
 
-    def top_touch_platform(self, platform):
-        if not platform.in_top_range(self.x):
-            return False
-        
-        if abs(platform.y - self.top()) <= 50:
-            return True
-        
-        return False
-    
-    def hit_platform(self, platform):
-        if not platform.in_top_range(self.x):
-            return False
-        
-        if self.top() - self.vy < platform.y < self.top():
-            return True
-        
-        return False
-    
-    def find_top_touching(self):
-        platforms = self.world.platforms
-        for p in platforms:
-            if self.hit_platform(p):
-                return p
+            new_platform = self.find_touching_platform()
+            if new_platform:
+                self.vy = 0
+                self.set_platform(new_platform)
+        else:
+            if (self.platform) and (not self.is_on_platform(self.platform)):
+                self.platform = None
+                self.is_jump = True
+                self.vy = 0
 
 class Fire:
     def __init__(self, world, x, y, width, height):
