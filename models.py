@@ -142,7 +142,7 @@ class Fire:
         return self.y + self.height//2
 
     def update(self, delta):
-        self.y += 1
+        self.y += 2
 
 class Platform:
     def __init__(self, world, x, y, width, height):
@@ -182,7 +182,7 @@ class World:
 
         self.mrcorn = MrCorn(self, 50, 150)
         self.floor_list = []
-        self.fire = Fire(self, self.width//2, -500, 700, 800)
+        self.fire = Fire(self, self.width//2, -700, 700, 800)
         self.platforms = self.gen_map(map_lv1)
         self.coins = self.gen_coin(lv1_coins)
         self.coin_point = 0

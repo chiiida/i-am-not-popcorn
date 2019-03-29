@@ -49,7 +49,7 @@ class ImNotPopcorn(arcade.Window):
     def __init__(self, width, height, title):
         super().__init__(width, height, title)
 
-        self.background = arcade.load_texture("images/bg2.png")
+        self.background = arcade.load_texture("images/bg3.png")
         self.view_bottom = 0
         
         self.world = World(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -97,6 +97,7 @@ class ImNotPopcorn(arcade.Window):
         top_bndry = self.view_bottom + SCREEN_HEIGHT - VIEWPORT_MARGIN
         if self.mrcorn_sprite.top() > top_bndry:
             self.view_bottom += self.mrcorn_sprite.top() - top_bndry
+
             changed = True
 
         if changed:
@@ -111,8 +112,8 @@ class ImNotPopcorn(arcade.Window):
 
     def on_draw(self):
         arcade.start_render()
-        arcade.draw_texture_rectangle(SCREEN_WIDTH // 2, 2000 // 2,
-                                      SCREEN_WIDTH, 2000, self.background)
+        arcade.draw_texture_rectangle(SCREEN_WIDTH // 2, 4000 // 2,
+                                      SCREEN_WIDTH, 4000, self.background)
         self.draw_platforms(self.world.platforms, 1)
         self.draw_floor(self.world.floor_list, 1)
         self.draw_coin(self.world.coins)
