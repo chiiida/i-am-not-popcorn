@@ -142,7 +142,7 @@ class Fire:
         return self.y + self.height//2
 
     def update(self, delta):
-        self.y += 2
+        self.y += 1
 
 class Platform:
     def __init__(self, world, x, y, width, height):
