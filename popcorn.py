@@ -38,6 +38,9 @@ class ImNotPopcorn(arcade.Window):
         self.fire_sprite = ModelSprite('images/fire.png', model=self.world.fire)
         self.fire_sprite.append_texture(arcade.load_texture('images/fire2.png'))
         self.coin_list = self.init_coin(self.world.coins)
+        self.checkpoint = self.init_checkpoint(self.world.checkpoint)
+        self.heart_sprite = ModelSprite('images/heart.png', model=self.world.heart)
+        
         self.timeCount = time.time()
         self.cur_texture = 0
 
@@ -65,15 +68,23 @@ class ImNotPopcorn(arcade.Window):
         for c in self.coin_list:
             if not c.model.is_collected:
                 c.draw()
+    
+    def init_checkpoint(self, checkpoint):
+        cp = ModelSprite('images/flags/lv1_flag1.png', model=checkpoint)
+        cp.append_texture(arcade.load_texture('images/flags/lv1_flag2.png'))
+        cp.append_texture(arcade.load_texture('images/flags/lv1_flag3.png'))
+        return cp
 
     def sprite_move(self):
         if self.cur_texture == 0:
             self.fire_sprite.set_texture(1)
+            self.checkpoint.set_texture(2)
             for c in self.coin_list:
-                c.set_texture(1)
+                c.set_texture(3)
             self.cur_texture = 1
         else:
             self.fire_sprite.set_texture(0)
+            self.checkpoint.set_texture(0)
             for c in self.coin_list:
                 c.set_texture(0)
             self.cur_texture = 0
@@ -107,7 +118,9 @@ class ImNotPopcorn(arcade.Window):
                                       SCREEN_WIDTH, 4000, self.background)
         self.draw_platforms(self.world.platforms, 1)
         self.draw_floor(self.world.floor_list, 1)
+        self.checkpoint.draw()
         self.draw_coin()
+        self.heart_sprite.draw()
         self.mrcorn_sprite.draw()
         self.fire_sprite.draw()
 

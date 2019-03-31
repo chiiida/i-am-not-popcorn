@@ -13,10 +13,10 @@ DIR_OFFSETS = { DIR_STILL: (0,0),
                 DIR_RIGHT: (1,0),
                 DIR_LEFT: (-1,0) }
 
-JUMP_SPEED = 20
+JUMP_SPEED = 18
 GRAVITY = -1
 
-COIN_HIT_MARGIN = 30
+ITEM_HIT_MARGIN = 30
 PLAYER_MARGIN = 50
 
 class Model:
@@ -33,6 +33,7 @@ class MrCorn(Model):
         self.vy = 0
         self.direction = DIR_STILL
         self.is_jump = False
+        self.jump_count = 0
         self.platform = None
     
     def move(self, direction):
@@ -40,9 +41,13 @@ class MrCorn(Model):
         self.y += MOVEMENT_SPEED * DIR_OFFSETS[direction][1]
     
     def jump(self):
-        if not self.is_jump:
+        if self.jump_count <= 1:
             self.is_jump = True
             self.vy = JUMP_SPEED
+            self.jump_count -= 1
+        # elif self.jump_count > 1:
+        #     self.is_jump = False
+        #     self.jump_count = 0
     
     def top(self):
         return self.y + 100
@@ -138,7 +143,27 @@ class Platform:
     def in_bottom_range(self, x):
         return self.x - self.width//2 <= x <= self.x + self.width//2
 
-class Coin:
+class CheckPoint:
+    def __init__(self, world, x, y, width, height):
+        self.world = world
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+
+    def top(self):
+        return self.y + self.height//2 
+    
+    def bottom(self):
+        return self.y - self.height//2
+    
+    def left(self):
+        return self.x - self.width//2
+    
+    def right(self):
+        return self.x + self.width//2
+
+class Item:
     def __init__(self, world, x, y):
         self.world = world
         self.x = x
@@ -146,11 +171,8 @@ class Coin:
         self.is_collected = False
     
     def collected(self, mrcorn):
-        return ((abs(self.x - mrcorn.x) < COIN_HIT_MARGIN) and
-                (abs(self.y - mrcorn.y) < COIN_HIT_MARGIN))
-    
-    def update(self, delta):
-        pass
+        return ((abs(self.x - mrcorn.x) < ITEM_HIT_MARGIN) and
+                (abs(self.y - mrcorn.y) < ITEM_HIT_MARGIN))
 
 class World:
     START = 0
@@ -164,6 +186,8 @@ class World:
         self.floor_list = []
         self.fire = Fire(self, self.width//2, -600, 700, 800)
         self.platforms = self.gen_map(map_lv1)
+        self.checkpoint = CheckPoint(self, self.platforms[-3].x, self.platforms[-3].y + 100, 100, 100)
+        self.heart = Item(self, self.platforms[48].x, self.platforms[48].y + 80)
         self.coins = self.gen_coin(lv1_coins)
         self.coin_point = 0
     
@@ -184,7 +208,7 @@ class World:
     def gen_coin(self, coin_array):
         self.coins = []
         for coin in coin_array:
-            c = Coin(self, coin[0], coin[1])
+            c = Item(self, coin[0], coin[1])
             self.coins.append(c)
         return self.coins
     
