@@ -26,6 +26,40 @@ class ModelSprite(arcade.Sprite):
         self.sync_with_model()
         super().draw()
 
+class WalkingSprite(arcade.AnimatedWalkingSprite):
+    def __init__(self, **kwargs):
+        self.model = kwargs.pop('model', None)
+ 
+        super().__init__(**kwargs)
+        self.stand_right_textures = []
+        self.stand_left_textures = []
+        self.walk_left_textures = []
+        self.walk_right_textures = []
+        self.walk_up_textures = []
+        self.texture_change_distance = 20
+        self.scale = 0.8
+    
+    def sync_with_model(self):
+        if self.model:
+            self.center_x = self.model.x
+            self.center_y = self.model.y
+    
+    def set_stand(self, png_right):
+        self.stand_right_textures.append(arcade.load_texture(png_right, scale=0.75))
+        self.stand_left_textures.append(arcade.load_texture(png_right,scale=0.75 , mirrored=True))
+    
+    def set_walk(self, png_list):
+        for p in png_list:
+            self.walk_left_textures.append(arcade.load_texture(p, scale=0.75))
+            self.walk_right_textures.append(arcade.load_texture(p, scale=0.75, mirrored=True))
+    
+    def top(self):
+        return self.model.y + 100
+
+    def draw(self):
+        self.sync_with_model()
+        self.update_animation()
+
 class ImNotPopcorn(arcade.Window):
     def __init__(self, width, height, title):
         super().__init__(width, height, title)
@@ -39,7 +73,6 @@ class ImNotPopcorn(arcade.Window):
         self.fire_sprite.append_texture(arcade.load_texture('images/fire2.png'))
         self.coin_list = self.init_coin(self.world.coins)
         self.checkpoint = self.init_checkpoint(self.world.checkpoint)
-        self.heart_sprite = ModelSprite('images/heart.png', model=self.world.heart)
         
         self.timeCount = time.time()
         self.cur_texture = 0
@@ -74,6 +107,23 @@ class ImNotPopcorn(arcade.Window):
         cp.append_texture(arcade.load_texture('images/flags/lv1_flag2.png'))
         cp.append_texture(arcade.load_texture('images/flags/lv1_flag3.png'))
         return cp
+    
+    def draw_heart_bar(self):
+        sp1 = ['images/heart.png', 'images/heart_empty.png', 'images/heart_empty.png']
+        sp2 = ['images/heart.png', 'images/heart.png', 'images/heart_empty.png']
+        sp3 = ['images/heart.png', 'images/heart.png', 'images/heart.png']
+        n = 0
+        for i in range(50, 151, 50):
+            if self.world.mrcorn.heart_count == 1:
+                h = arcade.Sprite(sp1[n])
+            elif self.world.mrcorn.heart_count == 2:
+                h = arcade.Sprite(sp2[n])
+            else:
+                h = arcade.Sprite(sp3[n])
+            h.center_x = i
+            h.center_y = SCREEN_HEIGHT + self.view_bottom - 90
+            h.draw()
+            n += 1
 
     def sprite_move(self):
         if self.cur_texture == 0:
@@ -105,6 +155,8 @@ class ImNotPopcorn(arcade.Window):
         if changed:
             arcade.set_viewport(0, 0 + SCREEN_WIDTH, self.view_bottom, 
                                 SCREEN_HEIGHT + self.view_bottom)
+            if self.fire_sprite.model.top() < self.view_bottom:
+                self.fire_sprite.model.y = self.view_bottom - 200
     
     def on_key_press(self, key, key_modifiers):
         self.world.on_key_press(key, key_modifiers)
@@ -120,11 +172,14 @@ class ImNotPopcorn(arcade.Window):
         self.draw_floor(self.world.floor_list, 1)
         self.checkpoint.draw()
         self.draw_coin()
-        self.heart_sprite.draw()
+        for i in self.world.heart:
+            h = ModelSprite('images/heart.png', model=i)
+            h.draw()
         self.mrcorn_sprite.draw()
         self.fire_sprite.draw()
 
-        arcade.draw_text(str(self.world.coin_point), SCREEN_WIDTH - 50, SCREEN_HEIGHT - 20, arcade.color.AMERICAN_ROSE, 20)
+        arcade.draw_text(str(self.world.coin_point), 20, SCREEN_HEIGHT + self.view_bottom - 50, arcade.color.AMERICAN_ROSE, 20)
+        self.draw_heart_bar()
 
 def main():
     window = ImNotPopcorn(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)

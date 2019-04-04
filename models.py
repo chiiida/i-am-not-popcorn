@@ -35,6 +35,8 @@ class MrCorn(Model):
         self.is_jump = False
         self.jump_count = 0
         self.platform = None
+        self.heart_count = 2
+        self.score = 0
     
     def move(self, direction):
         self.x += MOVEMENT_SPEED * DIR_OFFSETS[direction][0]
@@ -187,7 +189,7 @@ class World:
         self.fire = Fire(self, self.width//2, -600, 700, 800)
         self.platforms = self.gen_map(map_lv1)
         self.checkpoint = CheckPoint(self, self.platforms[-3].x, self.platforms[-3].y + 100, 100, 100)
-        self.heart = Item(self, self.platforms[48].x, self.platforms[48].y + 80)
+        self.heart = [Item(self, self.platforms[48].x, self.platforms[48].y + 80), Item(self, -100, -100)]
         self.coins = self.gen_coin(lv1_coins)
         self.coin_point = 0
     
@@ -224,6 +226,19 @@ class World:
                 index = self.coins.index(c)
                 self.coins.pop(index)
     
+    def collect_heart(self):
+        for h in self.heart:
+            if not h.is_collected and h.collected(self.mrcorn):
+                h.is_collected = True
+                if self.mrcorn.heart_count < 3:
+                    self.mrcorn.heart_count += 1
+    
+    def kill_heart(self):
+        for h in self.heart:
+            if h.is_collected:
+                index = self.heart.index(h)
+                self.heart.pop(index)
+    
     def is_dead(self):
         if self.mrcorn.bottom()+70 < self.fire.top():
             self.state = World.DEAD
@@ -247,3 +262,5 @@ class World:
             self.fire.update(delta)
             self.collect_coins()
             self.kill_coin()
+            self.collect_heart()
+            self.kill_heart()
