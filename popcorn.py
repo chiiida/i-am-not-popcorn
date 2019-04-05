@@ -69,6 +69,7 @@ class ImNotPopcorn(arcade.Window):
         
         self.world = World(SCREEN_WIDTH, SCREEN_HEIGHT)
         self.mrcorn_sprite = ModelSprite('images/mrcorn.png', model=self.world.mrcorn)
+        # self.init_level(self.world.lv1)
         self.fire_sprite = ModelSprite('images/fire.png', model=self.world.lv1.fire)
         self.fire_sprite.append_texture(arcade.load_texture('images/fire2.png'))
         self.coin_list = self.init_coin(self.world.lv1.coins)
@@ -78,12 +79,22 @@ class ImNotPopcorn(arcade.Window):
         self.timeCount = time.time()
         self.cur_texture = 0
     
-    def draw_platforms(self, platforms, level):
-        for platform in platforms[1:]:
+    def init_level(self, lv):
+        self.fire_sprite = ModelSprite('images/fire.png', model=lv.fire)
+        self.fire_sprite.append_texture(arcade.load_texture('images/fire2.png'))
+        self.coin_list = self.init_coin(lv.coins)
+        self.checkpoint = self.init_checkpoint(lv.checkpoint)
+
+    def draw_platforms(self, platforms):
+        for platform in platforms:
+            if platform.y > 3000:
+                level = 3
+            else:
+                level = 1
             p = ModelSprite(f'images/platforms/lv{level}_5.png', model=platform)
             p.draw()
         for floor in platforms[:8]:
-            f = ModelSprite(f'images/platforms/lv{level}_2.png', model=floor)
+            f = ModelSprite(f'images/platforms/lv1_2.png', model=floor)
             f.draw()
     
     def init_coin(self, coins):
@@ -173,6 +184,9 @@ class ImNotPopcorn(arcade.Window):
                                 SCREEN_HEIGHT + self.view_bottom)
             if self.fire_sprite.model.top() < self.view_bottom:
                 self.fire_sprite.model.y = self.view_bottom - 200
+            if self.world.mrcorn.y > 3000:
+                self.world.lv1.fire.level = 2
+            self.world.lv1.update_map()
     
     def draw_game_over(self):
         self.view_bottom = 0
@@ -184,13 +198,17 @@ class ImNotPopcorn(arcade.Window):
             char.set_position(SCREEN_WIDTH//2+(i+1)*20, SCREEN_HEIGHT//2)
             char.draw()
     
-    def draw_game(self, world, n):
-        self.draw_platforms(world.lv1.platforms, n)
+    def draw_game(self):
+        arcade.draw_rectangle_filled(SCREEN_WIDTH//2, SCREEN_HEIGHT + self.view_bottom//2, SCREEN_WIDTH, SCREEN_HEIGHT + self.view_bottom, arcade.color.BABY_BLUE)
+        arcade.draw_texture_rectangle(SCREEN_WIDTH // 2, 4000 // 2,
+                                      SCREEN_WIDTH, 4000, self.background)
+        self.draw_platforms(self.world.lv1.platforms)
         self.checkpoint.draw()
         self.draw_coin()
-        for i in world.lv1.heart:
+        for i in self.world.lv1.heart:
             h = ModelSprite('images/heart.png', model=i)
             h.draw()
+        self.fire_sprite.draw()
 
     def on_key_press(self, key, key_modifiers):
         self.world.on_key_press(key, key_modifiers)
@@ -203,11 +221,9 @@ class ImNotPopcorn(arcade.Window):
         if self.world.state == World.GAME_OVER:
             self.draw_game_over()
         else:
-            arcade.draw_texture_rectangle(SCREEN_WIDTH // 2, 4000 // 2,
-                                      SCREEN_WIDTH, 4000, self.background)
-            self.draw_game(self.world, 1)
+            #if not self.world.lv1.at_check_point():
+            self.draw_game()
             self.mrcorn_sprite.draw()
-            self.fire_sprite.draw()
             self.draw_score()
             self.draw_heart_bar()
 

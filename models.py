@@ -13,7 +13,7 @@ DIR_OFFSETS = { DIR_STILL: (0,0),
                 DIR_RIGHT: (1,0),
                 DIR_LEFT: (-1,0) }
 
-JUMP_SPEED = 18
+JUMP_SPEED = 20
 GRAVITY = -1
 PLAYER_MARGIN = 50
 
@@ -199,7 +199,7 @@ class Level:
         self.coins = self.gen_coin(self.coin)
         self.coin_point = 0
         self.heart = [Item(self, self.platforms[48].x, self.platforms[48].y + 80), Item(self, -100, -100)]
-    
+
     def gen_map(self, map):
         map.reverse()
         self.platforms = []
@@ -212,6 +212,15 @@ class Level:
                         p = Platform(self, (c)*100, 50, 100, 100)
                     self.platforms.append(p)
         return self.platforms
+    
+    def update_map(self):
+        random_platform(self.map)
+        if self.map[-2] != self.map[-1]:
+            for c in range(len(self.map[-1])):
+                if self.map[-1][c] != '.':    
+                    if self.map[-1][c] == '#':
+                        p = Platform(self, (c)*100, len(self.map)*100, 100, 100) 
+                        self.platforms.append(p)
     
     def gen_coin(self, coin_array):
         self.coins = []
@@ -247,7 +256,8 @@ class Level:
                 self.heart.pop(index)
     
     def is_dead(self):
-        return self.player.bottom()+70 < self.fire.top()
+       if self.player.bottom()+70 < self.fire.top():
+           self.world.state = World.DEAD
 
     def at_check_point(self):
         return self.checkpoint.x == self.player.x and self.checkpoint.y == self.player.y
@@ -269,9 +279,9 @@ class World:
         self.state = World.START
 
         self.mrcorn = MrCorn(self, 50, 150)
-        self.lv1 = Level(self, self.mrcorn, 700, 800, 1, map_lv2, lv2_coins)
-        self.lv2 = Level(self, self.mrcorn, 700, 800, 2, map_lv2, lv2_coins)
-        self.levels = [self.lv1, self.lv2]
+        self.lv1 = Level(self, self.mrcorn, 700, 800, 1, map_lv1, lv1_coins)
+        # self.lv2 = Level(self, self.mrcorn, 700, 800, 2, map_lv2, lv2_coins)
+        # self.levels = [self.lv1, self.lv2]
         # self.platforms = self.lv1.platforms + self.lv2.platforms
 
     def move_near_platform(self):
@@ -281,8 +291,8 @@ class World:
                 self.mrcorn.y = p.y + 100
                 break
 
-    def is_dead(self, lv):
-        if self.mrcorn.bottom()+70 < lv.fire.top():
+    def is_dead(self):
+        if self.mrcorn.bottom()+70 < self.lv1.fire.top():
             self.state = World.DEAD
 
     def game_over(self):
@@ -303,11 +313,11 @@ class World:
 
     def update(self, delta):
         self.game_over()
-        self.is_dead(self.lv1)
+        self.is_dead()
         if self.state == World.START:
             self.mrcorn.update(delta)
             self.lv1.update(delta)
-            self.lv2.update(delta)
+            # self.lv2.update(delta)
         elif self.state == World.DEAD:
             self.mrcorn.heart_count -= 1
             if self.mrcorn.heart_count > 0:
