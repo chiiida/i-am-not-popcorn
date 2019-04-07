@@ -31,17 +31,23 @@ map_lv1 = [ '####....',
             '....##..',
             '###.....',
             '....###.',
-            '$$$$$$$$']
+            '$$$$$$$$' ]
 
-map_pool = ['......##',
-            '..##....',
-            '.....###',
-            '...#....',
-            '.###....',
-            '.....#..',
-            '###.....',
+map_pool = ['....#...',
             '.....##.',
-            '....#...']
+            '....##..',
+            '......#.',
+            '....###.',
+            '...#....',
+            '..##....',
+            '...##...',
+            '..###...',
+            '.###....',]
+
+map_init = ['....##..',
+            '###.....',
+            '....###.',
+            '$$$$$$$$']
 
 lv1_coins = [[430, 305], [520, 305],
             [300, 370], [300, 450], [300, 530],
@@ -56,6 +62,25 @@ lv1_coins = [[430, 305], [520, 305],
             [100, 2500], [190, 2500], [280, 2500],
             [100, 2800], [100, 2890], [100, 2980]]
 
-def random_platform(lst):
-    p = random.choice(map_pool)
-    lst.append(p)
+def random_map(lst):
+    right = map_pool[:5]
+    left = map_pool[5:]
+    while len(lst) != 41:
+        p = random.choice(map_pool)
+        if lst[-1] != lst[-2] != lst[-3] != p:
+            if p in right and lst[0] not in right:
+                lst.insert(0, p)
+            elif p in left and lst[0] not in left:
+                lst.insert(0, p)
+    lst.insert(0, '####....')
+    return lst
+
+def random_coin(lst):
+    coin_list = []
+    for i in range(40):
+        p = random.choice(lst)
+        if p.avaliable == True:
+            p.item_on()
+            c = [p.x, p.y + 105]
+            coin_list.append(c)
+    return coin_list

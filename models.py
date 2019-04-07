@@ -1,4 +1,5 @@
 import arcade.key
+import random
 from maps import *
 
 MOVEMENT_SPEED = 5
@@ -13,7 +14,7 @@ DIR_OFFSETS = { DIR_STILL: (0,0),
                 DIR_RIGHT: (1,0),
                 DIR_LEFT: (-1,0) }
 
-JUMP_SPEED = 20
+JUMP_SPEED = 18
 GRAVITY = -1
 PLAYER_MARGIN = 50
 
@@ -46,9 +47,6 @@ class MrCorn(Model):
             self.is_jump = True
             self.vy = JUMP_SPEED
             self.jump_count -= 1
-        elif self.jump_count > 1:
-            self.is_jump = False
-            self.jump_count = 0
     
     def top(self):
         return self.y + 100
@@ -66,9 +64,6 @@ class MrCorn(Model):
         self.is_jump = False
         self.platform = platform
         self.y = platform.y + 100
-    
-    def set_lv_platform(self, platform):
-        self.lv_platform = platform
 
     def is_on_platform(self, platform):
         if not platform.in_top_range(self.x):
@@ -131,6 +126,9 @@ class Fire:
     
     def top(self):
         return self.y + self.height//2
+    
+    def update_level(self, lv):
+        self.level += (lv-1)/2
 
     def update(self, delta):
         self.y += self.level
@@ -142,12 +140,16 @@ class Platform:
         self.y = y
         self.width = width
         self.height = height
+        self.avaliable = True
 
     def in_top_range(self, x):
         return self.x - self.width//2 <= x <= self.x + self.width//2
 
     def in_bottom_range(self, x):
         return self.x - self.width//2 <= x <= self.x + self.width//2
+    
+    def item_on(self):
+        self.avaliable = False
 
 class CheckPoint:
     def __init__(self, world, x, y, width, height):
@@ -183,26 +185,27 @@ class Item:
                 (abs(self.y - mrcorn.y) < Item.ITEM_HIT_MARGIN))
 
 class Level:
-    def __init__(self, world, player, width, height, level, maps, coin):
+    def __init__(self, world, player, width, height):
         self.world = world
         self.player = player
         self.width = width
         self.height = height
-        self.level = level
-        self.map = maps
-        self.coin = coin
 
-        self.fire = Fire(self, self.width//2, -500, self.width, self.height, self.level)
+        self.map = random_map(map_init)
         self.platforms = self.gen_map(self.map)
-        self.player.set_lv_platform(self.platforms)
-        self.checkpoint = CheckPoint(self, self.platforms[-3].x, self.platforms[-3].y + 100, 100, 100)
+
+        self.spikes = self.gen_spikes()
+
+        self.coin = random_coin(self.platforms[8:-4])
         self.coins = self.gen_coin(self.coin)
-        self.coin_point = 0
-        self.heart = [Item(self, self.platforms[48].x, self.platforms[48].y + 80), Item(self, -100, -100)]
+
+        self.checkpoint = CheckPoint(self, self.platforms[-3].x, self.platforms[-3].y + 100, 100, 100)
+        self.heart = [Item(self, self.platforms[30].x, self.platforms[30].y + 80), Item(self, -100, -100)]
+        self.platforms[30].item_on()
 
     def gen_map(self, map):
         map.reverse()
-        self.platforms = []
+        platforms = []
         for r in range(len(map)):
             for c in range(len(map[0])):
                 if map[r][c] != '.':
@@ -210,37 +213,56 @@ class Level:
                         p = Platform(self, (c)*100, (r+1)*100, 100, 100)
                     elif map[r][c] == '$':
                         p = Platform(self, (c)*100, 50, 100, 100)
-                    self.platforms.append(p)
-        return self.platforms
-    
-    def update_map(self):
-        random_platform(self.map)
-        if self.map[-2] != self.map[-1]:
-            for c in range(len(self.map[-1])):
-                if self.map[-1][c] != '.':    
-                    if self.map[-1][c] == '#':
-                        p = Platform(self, (c)*100, len(self.map)*100, 100, 100) 
-                        self.platforms.append(p)
+                    platforms.append(p)
+        return platforms
     
     def gen_coin(self, coin_array):
-        self.coins = []
+        coins = []
         for coin in coin_array:
             c = Item(self, coin[0], coin[1])
-            self.coins.append(c)
-        return self.coins
+            coins.append(c)
+        return coins
+    
+    def gen_item(self):
+        items = []
+        for i in range(3):
+            p = random.choice(self.platforms[8:-4])
+            if p.avaliable == True:  
+                t = Item(self, p.x, p.y + 80)
+                p.item_on()
+                items.append(t)
+        n = random.randint[0,2]
+        return items[n], n
+    
+    def gen_spikes(self):
+        spikes = []
+        for i in range(5):
+            p = random.choice(self.platforms[8:-4])
+            if p.avaliable == True:
+                sp = Item(self, p.x, p.y + 75)
+                p.item_on()
+                spikes.append(sp)
+        return spikes
+    
+    def setup(self):
+        self.map = random_map(map_init)
+        self.platforms = self.gen_map(self.map)
+        self.coin = random_coin(self.platforms[8:-4])
+        self.coins = self.gen_coin(self.coin)
+        self.items = self.gen_item()
+        self.spikes = self.gen_spikes()
     
     def collect_coins(self):
         for c in self.coins:
             if not c.is_collected and c.collected(self.player):
                 c.is_collected = True
-                self.coin_point += 100
                 self.player.score += 100
     
-    def kill_coin(self):
-        for c in self.coins:
-            if c.is_collected:
-                index = self.coins.index(c)
-                self.coins.pop(index)
+    def kill_item(self, lst):
+        for t in lst:
+            if t.is_collected:
+                index = lst.index(t)
+                lst.pop(index)
     
     def collect_heart(self):
         for h in self.heart:
@@ -249,40 +271,38 @@ class Level:
                 if self.player.heart_count < 3:
                     self.player.heart_count += 1
     
-    def kill_heart(self):
-        for h in self.heart:
-            if h.is_collected:
-                index = self.heart.index(h)
-                self.heart.pop(index)
+    def hit_spikes(self):
+        for sp in self.spikes:
+            if not sp.is_collected and sp.collected(self.player):
+                self.world.state = World.DEAD
     
-    def is_dead(self):
-       if self.player.bottom()+70 < self.fire.top():
-           self.world.state = World.DEAD
-
+    def collect_item(self):
+        pass 
+        
     def at_check_point(self):
         return self.checkpoint.x == self.player.x and self.checkpoint.y == self.player.y
     
     def update(self, delta):
-        self.fire.update(delta)
         self.collect_coins()
-        self.kill_coin()
+        self.kill_item(self.coins)
         self.collect_heart()
-        self.kill_heart()
+        self.kill_item(self.heart)
+        self.hit_spikes()
 
 class World:
     START = 0
     DEAD = 1
     GAME_OVER = 2
+    PASS = 3
     def __init__(self, width, height):
         self.width = width
         self.height = height
         self.state = World.START
+        self.level = 1
 
         self.mrcorn = MrCorn(self, 50, 150)
-        self.lv1 = Level(self, self.mrcorn, 700, 800, 1, map_lv1, lv1_coins)
-        # self.lv2 = Level(self, self.mrcorn, 700, 800, 2, map_lv2, lv2_coins)
-        # self.levels = [self.lv1, self.lv2]
-        # self.platforms = self.lv1.platforms + self.lv2.platforms
+        self.fire = Fire(self, self.width//2, -500, self.width, self.height, self.level)
+        self.lv1 = Level(self, self.mrcorn, 700, 800)
 
     def move_near_platform(self):
         for p in self.lv1.platforms:
@@ -292,12 +312,16 @@ class World:
                 break
 
     def is_dead(self):
-        if self.mrcorn.bottom()+70 < self.lv1.fire.top():
+        if self.mrcorn.bottom()+70 < self.fire.top():
             self.state = World.DEAD
 
     def game_over(self):
         if self.mrcorn.heart_count == 0:
             self.state = World.GAME_OVER
+    
+    def next_level(self):
+        if self.lv1.at_check_point():
+            self.state = World.PASS
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.SPACE:
@@ -313,11 +337,17 @@ class World:
 
     def update(self, delta):
         self.game_over()
-        self.is_dead()
         if self.state == World.START:
+            self.next_level()
+            self.is_dead()
             self.mrcorn.update(delta)
+            self.fire.update(delta)
             self.lv1.update(delta)
-            # self.lv2.update(delta)
+        elif self.state == World.PASS:
+        #     self.lv1.setup()
+            self.level += 1
+            self.fire.update_level(self.level)
+            self.state = World.START
         elif self.state == World.DEAD:
             self.mrcorn.heart_count -= 1
             if self.mrcorn.heart_count > 0:
