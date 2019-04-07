@@ -193,15 +193,12 @@ class Level:
 
         self.map = random_map(map_init)
         self.platforms = self.gen_map(self.map)
-
-        self.spikes = self.gen_spikes()
-
         self.coin = random_coin(self.platforms[8:-4])
         self.coins = self.gen_coin(self.coin)
-
+        # self.items = self.gen_item()
+        self.spikes = self.gen_spikes()
+        self.heart = self.gen_heart()
         self.checkpoint = CheckPoint(self, self.platforms[-3].x, self.platforms[-3].y + 100, 100, 100)
-        self.heart = [Item(self, self.platforms[30].x, self.platforms[30].y + 80), Item(self, -100, -100)]
-        self.platforms[30].item_on()
 
     def gen_map(self, map):
         map.reverse()
@@ -236,7 +233,7 @@ class Level:
     
     def gen_spikes(self):
         spikes = []
-        for i in range(5):
+        while len(spikes) != 10:
             p = random.choice(self.platforms[8:-4])
             if p.avaliable == True:
                 sp = Item(self, p.x, p.y + 75)
@@ -244,13 +241,25 @@ class Level:
                 spikes.append(sp)
         return spikes
     
+    def gen_heart(self):
+        heart = [Item(self, -100, -100)]
+        while len(heart) != 2:
+            p = random.choice(self.platforms[8:-4])
+            if p.avaliable == True:
+                h = Item(self, p.x, p.y + 80)
+                p.item_on()
+                heart.insert(0, h)
+        return heart
+
     def setup(self):
         self.map = random_map(map_init)
         self.platforms = self.gen_map(self.map)
         self.coin = random_coin(self.platforms[8:-4])
         self.coins = self.gen_coin(self.coin)
-        self.items = self.gen_item()
+        # self.items = self.gen_item()
         self.spikes = self.gen_spikes()
+        self.heart = self.gen_heart()
+        self.checkpoint = CheckPoint(self, self.platforms[-3].x, self.platforms[-3].y + 100, 100, 100)
     
     def collect_coins(self):
         for c in self.coins:
@@ -278,9 +287,9 @@ class Level:
     
     def collect_item(self):
         pass 
-        
+
     def at_check_point(self):
-        return self.checkpoint.x == self.player.x and self.checkpoint.y == self.player.y
+        return self.checkpoint.x - 40 == self.player.x and self.checkpoint.y == self.player.y
     
     def update(self, delta):
         self.collect_coins()
@@ -323,6 +332,14 @@ class World:
         if self.lv1.at_check_point():
             self.state = World.PASS
 
+    def pass_level(self):
+        self.mrcorn.x = 50
+        self.mrcorn.y = 150
+        self.fire.x = self.width//2
+        self.fire.y = -500
+        self.level += 1
+        self.fire.update_level(self.level)
+
     def on_key_press(self, key, modifiers):
         if key == arcade.key.SPACE:
             self.mrcorn.jump()
@@ -344,9 +361,8 @@ class World:
             self.fire.update(delta)
             self.lv1.update(delta)
         elif self.state == World.PASS:
-        #     self.lv1.setup()
-            self.level += 1
-            self.fire.update_level(self.level)
+            self.lv1.setup()
+            self.pass_level()
             self.state = World.START
         elif self.state == World.DEAD:
             self.mrcorn.heart_count -= 1

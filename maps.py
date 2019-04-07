@@ -45,7 +45,7 @@ map_pool = ['....#...',
             '.###....',]
 
 map_init = ['....##..',
-            '###.....',
+            '.###....',
             '....###.',
             '$$$$$$$$']
 
@@ -62,22 +62,28 @@ lv1_coins = [[430, 305], [520, 305],
             [100, 2500], [190, 2500], [280, 2500],
             [100, 2800], [100, 2890], [100, 2980]]
 
+def check_platform(pf, p):
+    for i in range(8):
+        if p[i] == '#' and pf[i] == '#':
+            return False  
+
 def random_map(lst):
     right = map_pool[:5]
     left = map_pool[5:]
     while len(lst) != 41:
         p = random.choice(map_pool)
-        if lst[-1] != lst[-2] != lst[-3] != p:
-            if p in right and lst[0] not in right:
-                lst.insert(0, p)
-            elif p in left and lst[0] not in left:
-                lst.insert(0, p)
+        if lst[0] != lst[1] != lst[2] != p:
+            if check_platform(lst[0], p) != False:
+                if p in right and lst[0] not in right:
+                    lst.insert(0, p)
+                elif p in left and lst[0] not in left:
+                    lst.insert(0, p)
     lst.insert(0, '####....')
     return lst
 
 def random_coin(lst):
     coin_list = []
-    for i in range(40):
+    while len(coin_list) != 40:
         p = random.choice(lst)
         if p.avaliable == True:
             p.item_on()

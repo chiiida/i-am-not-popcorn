@@ -33,9 +33,12 @@ class ImNotPopcorn(arcade.Window):
     def __init__(self, width, height, title):
         super().__init__(width, height, title)
 
+        self.setup()
+    
+    def setup(self):
         self.background = arcade.load_texture("images/bg3.png")
         self.view_bottom = 0
-        
+    
         self.world = World(SCREEN_WIDTH, SCREEN_HEIGHT)
         self.mrcorn_sprite = ModelSprite('images/mrcorn.png', model=self.world.mrcorn)
         
@@ -49,7 +52,7 @@ class ImNotPopcorn(arcade.Window):
 
         self.timeCount = time.time()
         self.cur_texture = 0
-    
+
     def init_level(self, lv):
         self.fire_sprite = ModelSprite('images/fire.png', model=lv.fire)
         self.fire_sprite.append_texture(arcade.load_texture('images/fire2.png'))
@@ -198,9 +201,6 @@ class ImNotPopcorn(arcade.Window):
         if self.world.state == World.GAME_OVER:
             self.draw_game_over()
         else:
-            if self.world.state == World.PASS:
-                self.mrcorn_sprite.set_position(50, 150)
-                self.fire_sprite.set_position(SCREEN_WIDTH//2, -500)
             self.draw_game()
             self.draw_score()
             self.draw_heart_bar()
