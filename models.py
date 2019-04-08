@@ -215,19 +215,20 @@ class Level:
     
     def gen_item(self):
         items = []
-        for i in range(3):
-            p = random.choice(self.platforms[8:-4])
+        while len(items) != 2:
+            p = random.choice(self.platforms[8:-20])
             if p.avaliable == True:  
                 t = Item(self, p.x, p.y + 80)
                 p.item_on()
                 items.append(t)
-        n = random.randint[0,2]
-        return items[n], n
+        n = 0 #random.randint(0,1)
+        print(n)
+        return items, n
     
     def gen_spikes(self):
         spikes = []
         while len(spikes) != 10:
-            p = random.choice(self.platforms[8:-4])
+            p = random.choice(self.platforms[8:-8])
             if p.avaliable == True:
                 sp = Item(self, p.x, p.y + 75)
                 p.item_on()
@@ -237,7 +238,7 @@ class Level:
     def gen_heart(self):
         heart = [Item(self, -100, -100)]
         while len(heart) != 2:
-            p = random.choice(self.platforms[8:-4])
+            p = random.choice(self.platforms[20:-8])
             if p.avaliable == True:
                 h = Item(self, p.x, p.y + 80)
                 p.item_on()
@@ -247,9 +248,9 @@ class Level:
     def setup(self):
         self.map = random_map(map_init)
         self.platforms = self.gen_map(self.map)
-        self.coin = random_coin(self.platforms[8:-4])
+        self.coin = random_coin(self.platforms[8:-8])
         self.coins = self.gen_coin(self.coin)
-        # self.items = self.gen_item()
+        self.items, self.item_no = self.gen_item()
         self.spikes = self.gen_spikes()
         self.heart = self.gen_heart()
         self.checkpoint = CheckPoint(self, self.platforms[-3].x, self.platforms[-3].y + 100, 100, 100)
@@ -279,7 +280,16 @@ class Level:
                 self.world.state = World.DEAD
     
     def collect_item(self):
-        pass 
+        t = self.items[self.item_no]
+        if not t.is_collected and t.collected(self.player) and self.item_no == 0:
+            t.is_collected = True
+            self.player.y += 300
+            self.player.jump()
+        elif not t.is_collected and t.collected(self.player) and self.item_no == 1:
+            t.is_collected = True
+            self.player.jump()
+            self.player.y += 300
+    
 
     def at_check_point(self):
         return self.checkpoint.x - 40 == self.player.x and self.checkpoint.y == self.player.y
@@ -290,6 +300,8 @@ class Level:
         self.collect_heart()
         self.kill_item(self.heart)
         self.hit_spikes()
+        self.collect_item()
+        self.kill_item(self.items)
 
 class World:
     START = 0
@@ -348,13 +360,13 @@ class World:
     def update(self, delta):
         self.game_over()
         if self.state == World.START:
-            self.next_level()
             self.is_dead()
             self.mrcorn.update(delta)
             self.fire.update(delta)
             self.lv1.update(delta)
+            self.next_level()
         elif self.state == World.PASS:
-            self.lv1.setup()
+            # self.lv1.setup()
             self.pass_level()
             self.state = World.START
         elif self.state == World.DEAD:

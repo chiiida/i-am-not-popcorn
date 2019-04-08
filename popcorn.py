@@ -126,6 +126,16 @@ class ImNotPopcorn(arcade.Window):
         for sp in self.world.lv1.spikes:
             sp = ModelSprite('images/spikes.png', model=sp)
             sp.draw()
+    
+    def draw_item(self):
+        items = self.world.lv1.items
+        n = self.world.lv1.item_no
+        if n == 0:
+            t = ModelSprite('images/jetpack.png', model=items[n])
+        elif n == 1:
+            t = ModelSprite('images/jetpack.png', model=items[n])
+        t.draw()
+            
 
     def sprite_move(self):
         if self.cur_texture == 0:
@@ -154,7 +164,7 @@ class ImNotPopcorn(arcade.Window):
         if self.mrcorn_sprite.top() > top_bndry:
             self.view_bottom += self.mrcorn_sprite.top() - top_bndry
             changed = True
-        bottom_bndry = self.view_bottom + VIEWPORT_MARGIN
+        # bottom_bndry = self.view_bottom + VIEWPORT_MARGIN
         # if self.world.state == World.PASS:
         #     self.view_bottom -= bottom_bndry - self.mrcorn_sprite.bottom()
         #     changed = True
@@ -184,6 +194,7 @@ class ImNotPopcorn(arcade.Window):
         self.checkpoint.draw()
         self.draw_coin()
         self.draw_spikes()
+        self.draw_item()
         for i in self.world.lv1.heart:
             h = ModelSprite('images/heart.png', model=i)
             h.draw()
@@ -201,9 +212,12 @@ class ImNotPopcorn(arcade.Window):
         if self.world.state == World.GAME_OVER:
             self.draw_game_over()
         else:
+            if self.world.state == World.PASS:
+                self.view_bottom = SCREEN_HEIGHT - self.view_bottom
             self.draw_game()
             self.draw_score()
             self.draw_heart_bar()
+            arcade.draw_text(str(self.world.level), SCREEN_WIDTH - 50, SCREEN_HEIGHT + self.view_bottom - 50, arcade.color.RED, 20)
 
 def main():
     window = ImNotPopcorn(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
