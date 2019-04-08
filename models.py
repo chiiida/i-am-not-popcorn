@@ -191,14 +191,7 @@ class Level:
         self.width = width
         self.height = height
 
-        self.map = random_map(map_init)
-        self.platforms = self.gen_map(self.map)
-        self.coin = random_coin(self.platforms[8:-4])
-        self.coins = self.gen_coin(self.coin)
-        # self.items = self.gen_item()
-        self.spikes = self.gen_spikes()
-        self.heart = self.gen_heart()
-        self.checkpoint = CheckPoint(self, self.platforms[-3].x, self.platforms[-3].y + 100, 100, 100)
+        self.setup()
 
     def gen_map(self, map):
         map.reverse()

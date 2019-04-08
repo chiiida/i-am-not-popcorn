@@ -63,9 +63,11 @@ lv1_coins = [[430, 305], [520, 305],
             [100, 2800], [100, 2890], [100, 2980]]
 
 def check_platform(pf, p):
+    count = 0
     for i in range(8):
         if p[i] == '#' and pf[i] == '#':
-            return False  
+            count += 1
+    return count == 0
 
 def random_map(lst):
     right = map_pool[:5]
@@ -73,7 +75,7 @@ def random_map(lst):
     while len(lst) != 41:
         p = random.choice(map_pool)
         if lst[0] != lst[1] != lst[2] != p:
-            if check_platform(lst[0], p) != False:
+            if check_platform(lst[0], p):
                 if p in right and lst[0] not in right:
                     lst.insert(0, p)
                 elif p in left and lst[0] not in left:
