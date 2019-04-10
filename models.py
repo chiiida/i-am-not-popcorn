@@ -214,15 +214,14 @@ class Level:
         return coins
     
     def gen_item(self):
-        items = []
+        items = [Item(self, -100, -100)]
         while len(items) != 2:
             p = random.choice(self.platforms[8:-20])
             if p.avaliable == True:  
                 t = Item(self, p.x, p.y + 80)
                 p.item_on()
-                items.append(t)
-        n = 0 #random.randint(0,1)
-        print(n)
+                items.insert(0, t)
+        n = random.randint(0,1)
         return items, n
     
     def gen_spikes(self):
@@ -280,16 +279,14 @@ class Level:
                 self.world.state = World.DEAD
     
     def collect_item(self):
-        t = self.items[self.item_no]
-        if not t.is_collected and t.collected(self.player) and self.item_no == 0:
+        t = self.items[0]
+        if not t.is_collected and t.collected(self.player):
             t.is_collected = True
-            self.player.y += 300
-            self.player.jump()
-        elif not t.is_collected and t.collected(self.player) and self.item_no == 1:
-            t.is_collected = True
-            self.player.jump()
-            self.player.y += 300
-    
+            if self.item_no == 0:
+                self.player.y += 300
+                self.player.jump()
+            elif self.item_no == 1:
+                self.player.score += 1000
 
     def at_check_point(self):
         return self.checkpoint.x - 40 == self.player.x and self.checkpoint.y == self.player.y
@@ -361,12 +358,12 @@ class World:
         self.game_over()
         if self.state == World.START:
             self.is_dead()
+            self.next_level()
             self.mrcorn.update(delta)
             self.fire.update(delta)
             self.lv1.update(delta)
-            self.next_level()
         elif self.state == World.PASS:
-            # self.lv1.setup()
+            #self.lv1.setup()
             self.pass_level()
             self.state = World.START
         elif self.state == World.DEAD:

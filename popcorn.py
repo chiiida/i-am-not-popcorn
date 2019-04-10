@@ -131,9 +131,9 @@ class ImNotPopcorn(arcade.Window):
         items = self.world.lv1.items
         n = self.world.lv1.item_no
         if n == 0:
-            t = ModelSprite('images/jetpack.png', model=items[n])
+            t = ModelSprite('images/jetpack.png', model=items[0])
         elif n == 1:
-            t = ModelSprite('images/jetpack.png', model=items[n])
+            t = ModelSprite('images/jetpack.png', model=items[0])
         t.draw()
             
 
@@ -164,10 +164,6 @@ class ImNotPopcorn(arcade.Window):
         if self.mrcorn_sprite.top() > top_bndry:
             self.view_bottom += self.mrcorn_sprite.top() - top_bndry
             changed = True
-        # bottom_bndry = self.view_bottom + VIEWPORT_MARGIN
-        # if self.world.state == World.PASS:
-        #     self.view_bottom -= bottom_bndry - self.mrcorn_sprite.bottom()
-        #     changed = True
 
         if changed:
             arcade.set_viewport(0, SCREEN_WIDTH, self.view_bottom, 
@@ -177,12 +173,14 @@ class ImNotPopcorn(arcade.Window):
     
     def draw_game_over(self):
         self.view_bottom = 0
+        arcade.set_viewport(0, SCREEN_WIDTH, self.view_bottom, 
+                        SCREEN_HEIGHT + self.view_bottom)
         arcade.draw_rectangle_filled(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, 
                                      SCREEN_WIDTH, SCREEN_HEIGHT + self.view_bottom, arcade.color.BABY_BLUE)
         score = str(self.world.mrcorn.score)
         for i in range(len(score)):
             char = arcade.Sprite(f'images/score/{int(score[i])}.png')
-            char.set_position(SCREEN_WIDTH//2+(i+1)*20, SCREEN_HEIGHT//2)
+            char.set_position(SCREEN_WIDTH//2+(i+1)*20, (SCREEN_HEIGHT + self.view_bottom)//2)
             char.draw()
     
     def draw_game(self):
@@ -213,7 +211,9 @@ class ImNotPopcorn(arcade.Window):
             self.draw_game_over()
         else:
             if self.world.state == World.PASS:
-                self.view_bottom = SCREEN_HEIGHT - self.view_bottom
+                self.view_bottom = 0
+                arcade.set_viewport(0, SCREEN_WIDTH, self.view_bottom, 
+                                SCREEN_HEIGHT + self.view_bottom)
             self.draw_game()
             self.draw_score()
             self.draw_heart_bar()
