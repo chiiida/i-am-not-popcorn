@@ -292,6 +292,8 @@ class Level:
         return self.checkpoint.x - 40 == self.player.x and self.checkpoint.y == self.player.y
     
     def update(self, delta):
+        # if self.at_check_point():
+        #     self.setup()
         self.collect_coins()
         self.kill_item(self.coins)
         self.collect_heart()
@@ -311,7 +313,7 @@ class World:
         self.state = World.START
         self.level = 1
 
-        self.mrcorn = MrCorn(self, 50, 150)
+        self.mrcorn = MrCorn(self, 100, 150)
         self.fire = Fire(self, self.width//2, -500, self.width, self.height, self.level)
         self.lv1 = Level(self, self.mrcorn, 700, 800)
 
@@ -335,10 +337,10 @@ class World:
             self.state = World.PASS
 
     def pass_level(self):
-        self.mrcorn.x = 50
+        self.mrcorn.x = 100
         self.mrcorn.y = 150
         self.fire.x = self.width//2
-        self.fire.y = -500
+        self.fire.y = -500 - (self.level * 100)
         self.level += 1
         self.fire.update_level(self.level)
 
@@ -363,7 +365,7 @@ class World:
             self.fire.update(delta)
             self.lv1.update(delta)
         elif self.state == World.PASS:
-            #self.lv1.setup()
+            # self.lv1.setup()
             self.pass_level()
             self.state = World.START
         elif self.state == World.DEAD:

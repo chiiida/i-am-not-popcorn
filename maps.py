@@ -24,16 +24,11 @@ def check_platform(pf, p):
     return count == 0
 
 def random_map(lst):
-    right = map_pool[:5]
-    left = map_pool[5:]
-    while len(lst) != 41:
+    while len(lst) != 42:
         p = random.choice(map_pool)
-        if lst[0] != lst[1] != lst[2] != p:
-            if check_platform(lst[0], p):
-                if p in right and lst[0] not in right:
-                    lst.insert(0, p)
-                elif p in left and lst[0] not in left:
-                    lst.insert(0, p)
+        #if lst[0] != lst[1] != lst[2] != p:
+        if check_platform(lst[0], p):
+            lst.insert(0, p)
     lst.insert(0, '####....')
     return lst
 
