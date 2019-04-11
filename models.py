@@ -151,26 +151,6 @@ class Platform:
     def item_on(self):
         self.avaliable = False
 
-class CheckPoint:
-    def __init__(self, world, x, y, width, height):
-        self.world = world
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
-
-    def top(self):
-        return self.y + self.height//2 
-    
-    def bottom(self):
-        return self.y - self.height//2
-    
-    def left(self):
-        return self.x - self.width//2
-    
-    def right(self):
-        return self.x + self.width//2
-
 class Item:
     ITEM_HIT_MARGIN = 30
 
@@ -194,7 +174,6 @@ class Level:
         self.setup()
 
     def gen_map(self, map):
-        map.reverse()
         platforms = []
         for r in range(len(map)):
             for c in range(len(map[0])):
@@ -206,6 +185,13 @@ class Level:
                     platforms.append(p)
         return platforms
     
+    def avaliable_platforms(self):
+        p_lst = []
+        for p in self.platforms[8:-8]:
+            if p.avaliable == True:
+                p_lst.append(p)
+        return p_lst
+
     def gen_coin(self, coin_array):
         coins = []
         for coin in coin_array:
@@ -215,8 +201,8 @@ class Level:
     
     def gen_item(self):
         items = [Item(self, -100, -100)]
-        while len(items) != 2:
-            p = random.choice(self.platforms[8:-20])
+        for i in range(1):
+            p = random.choice(self.ava_platforms)
             if p.avaliable == True:  
                 t = Item(self, p.x, p.y + 80)
                 p.item_on()
@@ -226,8 +212,8 @@ class Level:
     
     def gen_spikes(self):
         spikes = []
-        while len(spikes) != 10:
-            p = random.choice(self.platforms[8:-8])
+        for i in range(10):
+            p = random.choice(self.ava_platforms)
             if p.avaliable == True:
                 sp = Item(self, p.x, p.y + 75)
                 p.item_on()
@@ -236,8 +222,8 @@ class Level:
     
     def gen_heart(self):
         heart = [Item(self, -100, -100)]
-        while len(heart) != 2:
-            p = random.choice(self.platforms[20:-8])
+        for i in range(1):
+            p = random.choice(self.ava_platforms)
             if p.avaliable == True:
                 h = Item(self, p.x, p.y + 80)
                 p.item_on()
@@ -245,14 +231,15 @@ class Level:
         return heart
 
     def setup(self):
-        self.map = random_map(map_init)
+        self.map = random_map()
         self.platforms = self.gen_map(self.map)
-        self.coin = random_coin(self.platforms[8:-8])
+        self.ava_platforms = self.avaliable_platforms()
+        self.coin = random_coin(self.ava_platforms)
         self.coins = self.gen_coin(self.coin)
         self.items, self.item_no = self.gen_item()
         self.spikes = self.gen_spikes()
         self.heart = self.gen_heart()
-        self.checkpoint = CheckPoint(self, self.platforms[-3].x, self.platforms[-3].y + 100, 100, 100)
+        self.checkpoint = Item(self, self.platforms[-3].x, self.platforms[-3].y + 100)
     
     def collect_coins(self):
         for c in self.coins:
@@ -292,8 +279,6 @@ class Level:
         return self.checkpoint.x - 40 == self.player.x and self.checkpoint.y == self.player.y
     
     def update(self, delta):
-        # if self.at_check_point():
-        #     self.setup()
         self.collect_coins()
         self.kill_item(self.coins)
         self.collect_heart()
@@ -334,6 +319,7 @@ class World:
     
     def next_level(self):
         if self.lv1.at_check_point():
+            self.lv1.setup()
             self.state = World.PASS
 
     def pass_level(self):
@@ -365,7 +351,6 @@ class World:
             self.fire.update(delta)
             self.lv1.update(delta)
         elif self.state == World.PASS:
-            # self.lv1.setup()
             self.pass_level()
             self.state = World.START
         elif self.state == World.DEAD:
