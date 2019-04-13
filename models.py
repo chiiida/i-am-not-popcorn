@@ -173,6 +173,17 @@ class Level:
 
         self.setup()
 
+    def setup(self):
+        self.map = random_map()
+        self.platforms = self.gen_map(self.map)
+        self.ava_platforms = self.avaliable_platforms()
+        self.coin = random_coin(self.ava_platforms)
+        self.coins = self.gen_coin(self.coin)
+        self.items, self.item_no = self.gen_item()
+        self.spikes = self.gen_spikes()
+        self.heart = self.gen_heart()
+        self.checkpoint = Item(self, self.platforms[-3].x, self.platforms[-3].y + 100)
+
     def gen_map(self, map):
         platforms = []
         for r in range(len(map)):
@@ -202,7 +213,7 @@ class Level:
     def gen_item(self):
         items = [Item(self, -100, -100)]
         for i in range(1):
-            p = random.choice(self.ava_platforms)
+            p = random.choice(self.platforms[8:-8])
             if p.avaliable == True:  
                 t = Item(self, p.x, p.y + 80)
                 p.item_on()
@@ -217,6 +228,7 @@ class Level:
             if p.avaliable == True:
                 sp = Item(self, p.x, p.y + 75)
                 p.item_on()
+                self.ava_platforms.remove(p)
                 spikes.append(sp)
         return spikes
     
@@ -227,19 +239,9 @@ class Level:
             if p.avaliable == True:
                 h = Item(self, p.x, p.y + 80)
                 p.item_on()
+                self.ava_platforms.remove(p)
                 heart.insert(0, h)
         return heart
-
-    def setup(self):
-        self.map = random_map()
-        self.platforms = self.gen_map(self.map)
-        self.ava_platforms = self.avaliable_platforms()
-        self.coin = random_coin(self.ava_platforms)
-        self.coins = self.gen_coin(self.coin)
-        self.items, self.item_no = self.gen_item()
-        self.spikes = self.gen_spikes()
-        self.heart = self.gen_heart()
-        self.checkpoint = Item(self, self.platforms[-3].x, self.platforms[-3].y + 100)
     
     def collect_coins(self):
         for c in self.coins:

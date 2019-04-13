@@ -25,8 +25,9 @@ def random_map():
                 '....##..']
     for i in range(42):
         p = random.choice(map_pool)
-        if check_platform(map_init[-1], p):
-            map_init.append(p)
+        while not check_platform(map_init[-1], p):
+            p = random.choice(map_pool)
+        map_init.append(p)
     map_init.append('####....')
     return map_init
 
@@ -37,5 +38,7 @@ def random_coin(lst):
         if p.avaliable == True:
             p.item_on()
             c = [p.x, p.y + 105]
+            index = lst.index(p)
+            lst.pop(index)
             coin_list.append(c)
     return coin_list

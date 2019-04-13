@@ -63,9 +63,9 @@ class ImNotPopcorn(arcade.Window):
         i = 1
         for platform in platforms:
             if i < 9:
-                p = ModelSprite(f'images/platforms/lv{self.world.level}_1.png', model=platform)
+                p = ModelSprite(f'images/platforms/lv{self.world.level%10}_1.png', model=platform)
             else:
-                p = ModelSprite(f'images/platforms/lv{self.world.level}_2.png', model=platform)
+                p = ModelSprite(f'images/platforms/lv{self.world.level%10}_2.png', model=platform)
             i += 1
             p.draw()
     
@@ -168,8 +168,8 @@ class ImNotPopcorn(arcade.Window):
     def draw_game(self):
         arcade.draw_rectangle_filled(SCREEN_WIDTH//2, SCREEN_HEIGHT + self.view_bottom//2, 
                                      SCREEN_WIDTH, SCREEN_HEIGHT + self.view_bottom, arcade.color.BABY_BLUE)
-        arcade.draw_texture_rectangle(SCREEN_WIDTH // 2, 5000 // 2,
-                                      SCREEN_WIDTH, 5000, self.background)
+        arcade.draw_texture_rectangle(SCREEN_WIDTH // 2, 6000 // 2,
+                                      SCREEN_WIDTH, 6000, self.background)
         self.draw_platforms(self.world.lv1.platforms)
         self.checkpoint.draw()
         self.draw_coin()
