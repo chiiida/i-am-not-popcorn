@@ -128,7 +128,7 @@ class Fire:
         return self.y + self.height//2
     
     def update_level(self, lv):
-        self.level += (lv-1)/2
+        self.level += (lv-1)/4
 
     def update(self, delta):
         self.y += self.level
@@ -180,7 +180,8 @@ class Level:
         self.coin = random_coin(self.ava_platforms)
         self.coins = self.gen_coin(self.coin)
         self.items, self.item_no = self.gen_item()
-        self.spikes = self.gen_spikes()
+        self.spikes = self.gen_enemies(5, 75)
+        self.wingman = self.gen_enemies(5, 90)
         self.heart = self.gen_heart()
         self.checkpoint = Item(self, self.platforms[-3].x, self.platforms[-3].y + 100)
 
@@ -221,16 +222,16 @@ class Level:
         n = random.randint(0,1)
         return items, n
     
-    def gen_spikes(self):
-        spikes = []
-        for i in range(10):
+    def gen_enemies(self, n, pos):
+        enemies = []
+        for i in range(n):
             p = random.choice(self.ava_platforms)
             if p.avaliable == True:
-                sp = Item(self, p.x, p.y + 75)
+                e = Item(self, p.x, p.y + pos)
                 p.item_on()
                 self.ava_platforms.remove(p)
-                spikes.append(sp)
-        return spikes
+                enemies.append(e)
+        return enemies
     
     def gen_heart(self):
         heart = [Item(self, -100, -100)]
@@ -262,8 +263,8 @@ class Level:
                 if self.player.heart_count < 3:
                     self.player.heart_count += 1
     
-    def hit_spikes(self):
-        for sp in self.spikes:
+    def hit_spikes(self, enemies):
+        for sp in enemies:
             if not sp.is_collected and sp.collected(self.player):
                 self.world.state = World.DEAD
     
@@ -285,7 +286,8 @@ class Level:
         self.kill_item(self.coins)
         self.collect_heart()
         self.kill_item(self.heart)
-        self.hit_spikes()
+        self.hit_spikes(self.spikes)
+        self.hit_spikes(self.wingman)
         self.collect_item()
         self.kill_item(self.items)
 

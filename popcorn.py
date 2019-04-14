@@ -38,6 +38,7 @@ class ImNotPopcorn(arcade.Window):
     def setup(self):
         self.background = arcade.load_texture("images/bg3.png")
         self.view_bottom = 0
+        self.n = 1
     
         self.world = World(SCREEN_WIDTH, SCREEN_HEIGHT)
         self.mrcorn_sprite = ModelSprite('images/mrcorn.png', model=self.world.mrcorn)
@@ -47,6 +48,7 @@ class ImNotPopcorn(arcade.Window):
         
         self.coin_list = self.init_coin(self.world.lv1.coins)
         self.checkpoint = self.init_checkpoint(self.world.lv1.checkpoint)
+        self.wingmans = self.init_wingman()
         
         self.coin_score = arcade.Sprite('images/score/coin1.png')
 
@@ -63,9 +65,9 @@ class ImNotPopcorn(arcade.Window):
         i = 1
         for platform in platforms:
             if i < 9:
-                p = ModelSprite(f'images/platforms/lv{self.world.level%10}_1.png', model=platform)
+                p = ModelSprite(f'images/platforms/lv{self.n}_1.png', model=platform)
             else:
-                p = ModelSprite(f'images/platforms/lv{self.world.level%10}_2.png', model=platform)
+                p = ModelSprite(f'images/platforms/lv{self.n}_2.png', model=platform)
             i += 1
             p.draw()
     
@@ -127,6 +129,17 @@ class ImNotPopcorn(arcade.Window):
             sp = ModelSprite('images/spikes.png', model=sp)
             sp.draw()
     
+    def init_wingman(self):
+        wingmans = []
+        for e in self.world.lv1.wingman:
+            wm = ModelSprite('images/wingman1.png', model=e)
+            wm.append_texture(arcade.load_texture('images/wingman2.png'))
+            wm.append_texture(arcade.load_texture('images/wingman3.png'))
+            wm.append_texture(arcade.load_texture('images/wingman4.png'))
+            wm.append_texture(arcade.load_texture('images/wingman5.png'))
+            wingmans.append(wm)
+        return wingmans
+    
     def draw_item(self):
         items = self.world.lv1.items
         n = self.world.lv1.item_no
@@ -143,6 +156,8 @@ class ImNotPopcorn(arcade.Window):
             self.coin_score.set_texture(3)
             for c in self.coin_list:
                 c.set_texture(3)
+            for wm in self.wingmans:
+                wm.set_texture(4)
             self.cur_texture = 1
         else:
             self.fire_sprite.set_texture(0)
@@ -150,6 +165,8 @@ class ImNotPopcorn(arcade.Window):
             self.coin_score.set_texture(0)
             for c in self.coin_list:
                 c.set_texture(0)
+            for wm in self.wingmans:
+                wm.set_texture(0)
             self.cur_texture = 0
         self.timeCount = time.time()
     
@@ -174,6 +191,8 @@ class ImNotPopcorn(arcade.Window):
         self.checkpoint.draw()
         self.draw_coin()
         self.draw_spikes()
+        for wm in self.wingmans:
+            wm.draw()
         self.draw_item()
         for i in self.world.lv1.heart:
             h = ModelSprite('images/heart.png', model=i)
@@ -211,6 +230,10 @@ class ImNotPopcorn(arcade.Window):
             self.draw_game_over()
         else:
             if self.world.state == World.PASS:
+                if self.n >= 6:
+                    self.n = 1
+                else:
+                    self.n += 1
                 self.view_bottom = 0
                 arcade.set_viewport(0, SCREEN_WIDTH, self.view_bottom, 
                                 SCREEN_HEIGHT + self.view_bottom)
