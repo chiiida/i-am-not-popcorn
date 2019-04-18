@@ -46,7 +46,7 @@ class MrCorn(Model):
         if self.jump_count <= 1:
             self.is_jump = True
             self.vy = JUMP_SPEED
-            self.jump_count -= 1
+            self.jump_count += 1
     
     def top(self):
         return self.y + 100
@@ -236,7 +236,7 @@ class Level:
     def gen_heart(self):
         heart = [Item(self, -100, -100)]
         for i in range(1):
-            p = random.choice(self.ava_platforms)
+            p = random.choice(self.ava_platforms[10:])
             if p.avaliable == True:
                 h = Item(self, p.x, p.y + 80)
                 p.item_on()
@@ -333,6 +333,15 @@ class World:
         self.fire.y = -500 - (self.level * 100)
         self.level += 1
         self.fire.update_level(self.level)
+    
+    def start(self):
+        self.mrcorn.x = 100
+        self.mrcorn.y = 150
+        self.mrcorn.heart_count = 3
+        self.mrcorn.score = 0
+        self.fire.x = self.width//2
+        self.fire.y = -500 - (self.level * 100)
+        self.level = 1
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.SPACE:

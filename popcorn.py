@@ -202,6 +202,12 @@ class ImNotPopcorn(arcade.Window):
 
     def on_key_press(self, key, key_modifiers):
         self.world.on_key_press(key, key_modifiers)
+        if key == arcade.key.SPACE and self.world.state == World.GAME_OVER:
+            self.world.start()
+            self.view_bottom = 0
+            arcade.set_viewport(0, SCREEN_WIDTH, self.view_bottom, 
+                            SCREEN_HEIGHT + self.view_bottom)
+            self.world.state = World.START
     
     def on_key_release(self, key, key_modifiers):
         self.world.on_key_release(key, key_modifiers)
@@ -228,7 +234,7 @@ class ImNotPopcorn(arcade.Window):
         arcade.start_render()
         if self.world.state == World.GAME_OVER:
             self.draw_game_over()
-        else:
+        elif self.world.state == World.START:
             if self.world.state == World.PASS:
                 if self.n >= 6:
                     self.n = 1
