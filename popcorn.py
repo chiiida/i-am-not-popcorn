@@ -46,8 +46,8 @@ class ImNotPopcorn(arcade.Window):
         self.fire_sprite = ModelSprite('images/fire.png', model=self.world.fire)
         self.fire_sprite.append_texture(arcade.load_texture('images/fire2.png'))
         
-        self.coin_list = self.init_coin(self.world.lv1.coins)
-        self.checkpoint = self.init_checkpoint(self.world.lv1.checkpoint)
+        self.coin_list = self.init_coin()
+        self.checkpoint = self.init_checkpoint()
         self.wingmans = self.init_wingman()
         
         self.coin_score = arcade.Sprite('images/score/coin1.png')
@@ -71,9 +71,9 @@ class ImNotPopcorn(arcade.Window):
             i += 1
             p.draw()
     
-    def init_coin(self, coins):
+    def init_coin(self):
         coins_lst = []
-        for coin in coins:
+        for coin in self.world.lv1.coins:
             c = ModelSprite('images/coin/coin1.png', model=coin)
             c.append_texture(arcade.load_texture('images/coin/coin2.png'))
             c.append_texture(arcade.load_texture('images/coin/coin3.png'))
@@ -86,8 +86,8 @@ class ImNotPopcorn(arcade.Window):
             if not c.model.is_collected:
                 c.draw()
     
-    def init_checkpoint(self, checkpoint):
-        cp = ModelSprite('images/flags/lv1_flag1.png', model=checkpoint)
+    def init_checkpoint(self):
+        cp = ModelSprite('images/flags/lv1_flag1.png', model=self.world.lv1.checkpoint)
         cp.append_texture(arcade.load_texture('images/flags/lv1_flag2.png'))
         cp.append_texture(arcade.load_texture('images/flags/lv1_flag3.png'))
         return cp
@@ -176,6 +176,7 @@ class ImNotPopcorn(arcade.Window):
                         SCREEN_HEIGHT + self.view_bottom)
         arcade.draw_rectangle_filled(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, 
                                      SCREEN_WIDTH, SCREEN_HEIGHT + self.view_bottom, arcade.color.BABY_BLUE)
+        arcade.draw_text('PRESS SPACE TO RESTART', 200, 500, arcade.color.BLACK, 20)
         score = str(self.world.mrcorn.score)
         for i in range(len(score)):
             char = arcade.Sprite(f'images/score/{int(score[i])}.png')
@@ -199,11 +200,27 @@ class ImNotPopcorn(arcade.Window):
             h.draw()
         self.mrcorn_sprite.draw()
         self.fire_sprite.draw()
+    
+    def next_level(self):
+        if self.n >= 6:
+            self.n = 1
+        else:
+            self.n += 1
+        self.view_bottom = 0
+        arcade.set_viewport(0, SCREEN_WIDTH, self.view_bottom, 
+                        SCREEN_HEIGHT + self.view_bottom)
+        self.coin_list = self.init_coin()
+        self.checkpoint = self.init_checkpoint()
+        self.wingmans = self.init_wingman()
 
     def on_key_press(self, key, key_modifiers):
         self.world.on_key_press(key, key_modifiers)
         if key == arcade.key.SPACE and self.world.state == World.GAME_OVER:
-            self.world.start()
+            self.world.restart()
+            self.n = 1
+            self.coin_list = self.init_coin()
+            self.checkpoint = self.init_checkpoint()
+            self.wingmans = self.init_wingman()
             self.view_bottom = 0
             arcade.set_viewport(0, SCREEN_WIDTH, self.view_bottom, 
                             SCREEN_HEIGHT + self.view_bottom)
@@ -234,17 +251,9 @@ class ImNotPopcorn(arcade.Window):
         arcade.start_render()
         if self.world.state == World.GAME_OVER:
             self.draw_game_over()
-        elif self.world.state == World.START:
+        else:
             if self.world.state == World.PASS:
-                if self.n >= 6:
-                    self.n = 1
-                else:
-                    self.n += 1
-                self.view_bottom = 0
-                arcade.set_viewport(0, SCREEN_WIDTH, self.view_bottom, 
-                                SCREEN_HEIGHT + self.view_bottom)
-                self.coin_list = self.init_coin(self.world.lv1.coins)
-                self.checkpoint = self.init_checkpoint(self.world.lv1.checkpoint)
+                self.next_level()
             self.draw_game()
             self.draw_score()
             self.draw_heart_bar()
