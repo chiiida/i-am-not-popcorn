@@ -184,7 +184,7 @@ class Level:
         self.spikes = self.gen_enemies(5, 75)
         self.wingman = self.gen_enemies(5, 90)
         self.heart = self.gen_heart()
-        self.checkpoint = Item(self, self.platforms[-3].x, self.platforms[-3].y + 100)
+        self.checkpoint = Item(self, self.platforms[-2].x, self.platforms[-2].y + 100)
 
     def gen_map(self, map):
         platforms = []
