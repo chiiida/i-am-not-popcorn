@@ -219,7 +219,7 @@ class Level:
                 t = Item(self, p.x, p.y + 80)
                 p.item_on()
                 items.insert(0, t)
-        n = 0 #random.randint(0,1)
+        n = random.randint(0,1)
         return items, n
     
     def gen_enemies(self, n, pos):
