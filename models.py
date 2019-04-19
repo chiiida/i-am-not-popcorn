@@ -219,7 +219,7 @@ class Level:
                 t = Item(self, p.x, p.y + 80)
                 p.item_on()
                 items.insert(0, t)
-        n = random.randint(0,1)
+        n = 0 #random.randint(0,1)
         return items, n
     
     def gen_enemies(self, n, pos):
@@ -273,9 +273,9 @@ class Level:
         if not t.is_collected and t.collected(self.player):
             t.is_collected = True
             if self.item_no == 0:
-                self.player.y += 300
+                self.player.y += 500
                 self.player.jump()
-            elif self.item_no == 1:
+            elif self.item_no == 1 :
                 self.player.score += 1000
 
     def at_check_point(self):
