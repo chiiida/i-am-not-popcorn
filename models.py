@@ -107,6 +107,7 @@ class MrCorn(Model):
             new_platform = self.find_touching_platform()
             if new_platform:
                 self.vy = 0
+                self.jump_count = 0
                 self.set_platform(new_platform)
         else:
             if (self.platform) and (not self.is_on_platform(self.platform)):
