@@ -275,7 +275,7 @@ class Level:
             if self.item_no == 0:
                 self.player.y += 500
                 self.player.jump()
-            elif self.item_no == 1 :
+            elif self.item_no == 1:
                 self.player.score += 1000
 
     def at_check_point(self):
