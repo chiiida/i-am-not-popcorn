@@ -46,7 +46,7 @@ class MrCorn(Model):
         if self.jump_count <= 1:
             self.is_jump = True
             self.vy = JUMP_SPEED
-            self.jump_count += 1
+            self.jump_count -= 1
     
     def top(self):
         return self.y + 100

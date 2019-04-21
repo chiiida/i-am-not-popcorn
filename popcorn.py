@@ -6,6 +6,7 @@ import time
 SCREEN_WIDTH = 700
 SCREEN_HEIGHT = 800
 SCREEN_TITLE = 'I AM NOT POPCORN!'
+SCALE = 0.5
 
 VIEWPORT_MARGIN = 40
 
@@ -36,12 +37,12 @@ class ImNotPopcorn(arcade.Window):
         self.setup()
     
     def setup(self):
-        self.background = arcade.load_texture("images/bg3.png")
+        self.background = arcade.load_texture("images/bg.png")
         self.view_bottom = 0
         self.n = 1
     
         self.world = World(SCREEN_WIDTH, SCREEN_HEIGHT)
-        self.mrcorn_sprite = ModelSprite('images/mrcorn.png', model=self.world.mrcorn)
+        self.mrcorn_sprite = ModelSprite('images/mrcorn.png', model=self.world.mrcorn, scale=SCALE)
         
         self.fire_sprite = ModelSprite('images/fire.png', model=self.world.fire)
         self.fire_sprite.append_texture(arcade.load_texture('images/fire2.png'))
@@ -65,9 +66,9 @@ class ImNotPopcorn(arcade.Window):
         i = 1
         for platform in platforms:
             if i < 9:
-                p = ModelSprite(f'images/platforms/lv{self.n}_1.png', model=platform)
+                p = ModelSprite(f'images/platforms/lv{self.n}_1.png', model=platform, scale=SCALE)
             else:
-                p = ModelSprite(f'images/platforms/lv{self.n}_2.png', model=platform)
+                p = ModelSprite(f'images/platforms/lv{self.n}_2.png', model=platform, scale=SCALE)
             i += 1
             p.draw()
     
@@ -132,11 +133,11 @@ class ImNotPopcorn(arcade.Window):
     def init_wingman(self):
         wingmans = []
         for e in self.world.lv1.wingman:
-            wm = ModelSprite('images/wingman1.png', model=e)
-            wm.append_texture(arcade.load_texture('images/wingman2.png'))
-            wm.append_texture(arcade.load_texture('images/wingman3.png'))
-            wm.append_texture(arcade.load_texture('images/wingman4.png'))
-            wm.append_texture(arcade.load_texture('images/wingman5.png'))
+            wm = ModelSprite('images/enemy/wingman1.png', model=e)
+            wm.append_texture(arcade.load_texture('images/enemy/wingman2.png'))
+            wm.append_texture(arcade.load_texture('images/enemy/wingman3.png'))
+            wm.append_texture(arcade.load_texture('images/enemy/wingman4.png'))
+            wm.append_texture(arcade.load_texture('images/enemy/wingman5.png'))
             wingmans.append(wm)
         return wingmans
     
