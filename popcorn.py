@@ -44,8 +44,8 @@ class ImNotPopcorn(arcade.Window):
         self.world = World(SCREEN_WIDTH, SCREEN_HEIGHT)
         self.mrcorn_sprite = ModelSprite('images/mrcorn.png', model=self.world.mrcorn, scale=SCALE)
         
-        self.fire_sprite = ModelSprite('images/fire.png', model=self.world.fire)
-        self.fire_sprite.append_texture(arcade.load_texture('images/fire2.png'))
+        self.fire_sprite = ModelSprite('images/fire1.png', model=self.world.fire, scale=SCALE)
+        self.fire_sprite.append_texture(arcade.load_texture('images/fire21.png'))
         
         self.coin_list = self.init_coin()
         self.checkpoint = self.init_checkpoint()
@@ -57,8 +57,8 @@ class ImNotPopcorn(arcade.Window):
         self.cur_texture = 0
 
     def init_level(self, lv):
-        self.fire_sprite = ModelSprite('images/fire.png', model=lv.fire)
-        self.fire_sprite.append_texture(arcade.load_texture('images/fire2.png'))
+        self.fire_sprite = ModelSprite('images/fire1.png', model=lv.fire, scale=SCALE)
+        self.fire_sprite.append_texture(arcade.load_texture('images/fire21.png'))
         self.coin_list = self.init_coin(lv.coins)
         self.checkpoint = self.init_checkpoint(lv.checkpoint)
 
@@ -109,17 +109,17 @@ class ImNotPopcorn(arcade.Window):
         self.coin_score.draw()
 
     def draw_heart_bar(self):
-        sp1 = ['images/score/heart.png', 'images/score/heart_empty.png', 'images/score/heart_empty.png']
-        sp2 = ['images/score/heart.png', 'images/score/heart.png', 'images/score/heart_empty.png']
-        sp3 = ['images/score/heart.png', 'images/score/heart.png', 'images/score/heart.png']
+        sp1 = ['images/heart1.png', 'images/heart_empty1.png', 'images/heart_empty1.png']
+        sp2 = ['images/heart1.png', 'images/heart1.png', 'images/heart_empty1.png']
+        sp3 = ['images/heart1.png', 'images/heart1.png', 'images/heart1.png']
         n = 0
         for i in range(50, 151, 45):
             if self.world.mrcorn.heart_count == 1:
-                h = arcade.Sprite(sp1[n])
+                h = arcade.Sprite(sp1[n], scale=0.4)
             elif self.world.mrcorn.heart_count == 2:
-                h = arcade.Sprite(sp2[n])
+                h = arcade.Sprite(sp2[n], scale=0.4)
             else:
-                h = arcade.Sprite(sp3[n])
+                h = arcade.Sprite(sp3[n], scale=0.4)
             h.center_x = i
             h.center_y = SCREEN_HEIGHT + self.view_bottom - 90
             h.draw()
@@ -144,10 +144,10 @@ class ImNotPopcorn(arcade.Window):
     def draw_item(self):
         items = self.world.lv1.items
         n = self.world.lv1.item_no
-        if n == 0:
-            t = ModelSprite('images/jetpack.png', model=items[0])
-        elif n == 1:
-            t = ModelSprite('images/star.png', model=items[0])
+        if n%2 == 0:
+            t = ModelSprite('images/jetpack1.png', model=items[0], scale=SCALE)
+        elif n%2 != 0:
+            t = ModelSprite('images/star1.png', model=items[0], scale=SCALE)
         t.draw()  
 
     def sprite_move(self):
@@ -197,7 +197,7 @@ class ImNotPopcorn(arcade.Window):
             wm.draw()
         self.draw_item()
         for i in self.world.lv1.heart:
-            h = ModelSprite('images/heart.png', model=i)
+            h = ModelSprite('images/heart1.png', model=i, scale=SCALE)
             h.draw()
         self.mrcorn_sprite.draw()
         self.fire_sprite.draw()

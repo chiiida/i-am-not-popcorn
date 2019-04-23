@@ -46,7 +46,7 @@ class MrCorn(Model):
         if self.jump_count <= 1:
             self.is_jump = True
             self.vy = JUMP_SPEED
-            self.jump_count -= 1
+            self.jump_count += 1
     
     def top(self):
         return self.y + 100
@@ -220,7 +220,7 @@ class Level:
                 t = Item(self, p.x, p.y + 80)
                 p.item_on()
                 items.insert(0, t)
-        n = random.randint(0,1)
+        n = random.randint(1,10)
         return items, n
     
     def gen_enemies(self, n, pos):
@@ -273,10 +273,10 @@ class Level:
         t = self.items[0]
         if not t.is_collected and t.collected(self.player):
             t.is_collected = True
-            if self.item_no == 0:
+            if self.item_no%2 == 0:
                 self.player.y += 500
                 self.player.jump()
-            elif self.item_no == 1:
+            elif self.item_no%2 != 0:
                 self.player.score += 1000
 
     def at_check_point(self):
