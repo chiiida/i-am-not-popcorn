@@ -297,10 +297,11 @@ class World:
     DEAD = 1
     GAME_OVER = 2
     PASS = 3
+    STILL = 4
     def __init__(self, width, height):
         self.width = width
         self.height = height
-        self.state = World.START
+        self.state = World.STILL
         self.level = 1
 
         self.mrcorn = MrCorn(self, 100, 150)

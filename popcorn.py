@@ -51,7 +51,10 @@ class ImNotPopcorn(arcade.Window):
         self.checkpoint = self.init_checkpoint()
         self.wingmans = self.init_wingman()
         
-        self.coin_score = arcade.Sprite('images/score/coin1.png')
+        self.coin_score = ModelSprite('images/coin/coin_1.png', scale=0.4)
+        self.coin_score.append_texture(arcade.load_texture('images/coin/coin_2.png'))
+        self.coin_score.append_texture(arcade.load_texture('images/coin/coin_3.png'))
+        self.coin_score.append_texture(arcade.load_texture('images/coin/coin_4.png'))
 
         self.timeCount = time.time()
         self.cur_texture = 0
@@ -75,10 +78,10 @@ class ImNotPopcorn(arcade.Window):
     def init_coin(self):
         coins_lst = []
         for coin in self.world.lv1.coins:
-            c = ModelSprite('images/coin/coin1.png', model=coin)
-            c.append_texture(arcade.load_texture('images/coin/coin2.png'))
-            c.append_texture(arcade.load_texture('images/coin/coin3.png'))
-            c.append_texture(arcade.load_texture('images/coin/coin4.png'))
+            c = ModelSprite('images/coin/coin_1.png', model=coin, scale=SCALE)
+            c.append_texture(arcade.load_texture('images/coin/coin_2.png'))
+            c.append_texture(arcade.load_texture('images/coin/coin_3.png'))
+            c.append_texture(arcade.load_texture('images/coin/coin_4.png'))
             coins_lst.append(c)
         return coins_lst
 
@@ -94,9 +97,9 @@ class ImNotPopcorn(arcade.Window):
         return cp
     
     def draw_score(self):
-        self.coin_score.append_texture(arcade.load_texture('images/score/coin2.png'))
-        self.coin_score.append_texture(arcade.load_texture('images/score/coin3.png'))
-        self.coin_score.append_texture(arcade.load_texture('images/score/coin4.png'))
+        self.coin_score.append_texture(arcade.load_texture('images/coin/coin_2.png'))
+        self.coin_score.append_texture(arcade.load_texture('images/coin/coin_3.png'))
+        self.coin_score.append_texture(arcade.load_texture('images/coin/coin_4.png'))
         self.coin_score.set_position(50, SCREEN_HEIGHT + self.view_bottom - 50)
         x = arcade.Sprite('images/score/times.png')
         x.set_position(90, SCREEN_HEIGHT + self.view_bottom - 50)
@@ -127,7 +130,7 @@ class ImNotPopcorn(arcade.Window):
 
     def draw_spikes(self):
         for sp in self.world.lv1.spikes:
-            sp = ModelSprite('images/spikes.png', model=sp)
+            sp = ModelSprite('images/spikes.png', model=sp, scale=0.25)
             sp.draw()
     
     def init_wingman(self):
@@ -171,6 +174,13 @@ class ImNotPopcorn(arcade.Window):
             self.cur_texture = 0
         self.timeCount = time.time()
     
+    def draw_start(self):
+        arcade.set_viewport(0, SCREEN_WIDTH, self.view_bottom, 
+                        SCREEN_HEIGHT + self.view_bottom)
+        arcade.draw_rectangle_filled(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, 
+                                     SCREEN_WIDTH, SCREEN_HEIGHT + self.view_bottom, arcade.color.BABY_BLUE)
+        arcade.draw_text('PRESS ENTER TO RESTART', 200, 500, arcade.color.BLACK, 20)
+
     def draw_game_over(self):
         self.view_bottom = 0
         arcade.set_viewport(0, SCREEN_WIDTH, self.view_bottom, 
@@ -216,6 +226,8 @@ class ImNotPopcorn(arcade.Window):
 
     def on_key_press(self, key, key_modifiers):
         self.world.on_key_press(key, key_modifiers)
+        if key == arcade.key.ENTER and self.world.state == World.STILL:
+            self.world.state = World.START
         if key == arcade.key.SPACE and self.world.state == World.GAME_OVER:
             self.world.restart()
             self.n = 1
@@ -234,7 +246,7 @@ class ImNotPopcorn(arcade.Window):
         changed = False
         self.world.update(delta)
 
-        if time.time() - self.timeCount > 0.2:
+        if time.time() - self.timeCount > 0.3:
             self.sprite_move()
 
         top_bndry = self.view_bottom + SCREEN_HEIGHT - VIEWPORT_MARGIN
@@ -250,7 +262,9 @@ class ImNotPopcorn(arcade.Window):
 
     def on_draw(self):
         arcade.start_render()
-        if self.world.state == World.GAME_OVER:
+        if self.world.state == World.STILL:
+            self.draw_start()
+        elif self.world.state == World.GAME_OVER:
             self.draw_game_over()
         else:
             if self.world.state == World.PASS:
