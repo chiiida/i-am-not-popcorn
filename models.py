@@ -176,7 +176,7 @@ class Level:
         self.coins = self.gen_coin(self.coin)
         self.items, self.item_no = self.gen_item()
         self.spikes = self.gen_enemies(5, 75)
-        self.wingman = self.gen_enemies(5, 90)
+        self.wingman = self.gen_enemies(5, 100)
         self.heart = self.gen_heart()
         self.checkpoint = Item(self, self.platforms[-2].x, self.platforms[-2].y + 100)
 

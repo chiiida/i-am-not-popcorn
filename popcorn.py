@@ -42,7 +42,6 @@ class ImNotPopcorn(arcade.Window):
 
         self.setup()
         self.cur_page = INSTRUCTION_0
-        self.fps = FPSCounter()
     
     def setup(self):
         self.background = arcade.load_texture("images/bg.png")
@@ -140,9 +139,8 @@ class ImNotPopcorn(arcade.Window):
     def init_wingman(self):
         wingmans = []
         for e in self.world.lv1.wingman:
-            wm = ModelSprite('images/enemy/wingman1.png', model=e)
-            for i in range(2, 6):
-                wm.append_texture(arcade.load_texture(f'images/enemy/wingman{i}.png'))
+            wm = ModelSprite('images/enemy/red1.png', model=e, scale=SCALE)
+            wm.append_texture(arcade.load_texture(f'images/enemy/red2.png'))
             wingmans.append(wm)
         return wingmans
     
@@ -163,7 +161,7 @@ class ImNotPopcorn(arcade.Window):
             for c in self.coin_list:
                 c.set_texture(3)
             for wm in self.wingmans:
-                wm.set_texture(4)
+                wm.set_texture(1)
             self.cur_texture = 1
         else:
             self.fire_sprite.set_texture(0)
