@@ -1,5 +1,6 @@
 import arcade
 from models import World, MrCorn
+import collections
 import random
 import time
 
@@ -9,6 +10,11 @@ SCREEN_TITLE = 'I AM NOT POPCORN!'
 SCALE = 0.5
 
 VIEWPORT_MARGIN = 40
+
+GAME_OVER = 0
+INSTRUCTION_0 = 1
+INSTRUCTION_1 = 2
+RUNNING = 3
 
 class ModelSprite(arcade.Sprite):
     def __init__(self, *args, **kwargs):
@@ -35,6 +41,8 @@ class ImNotPopcorn(arcade.Window):
         super().__init__(width, height, title)
 
         self.setup()
+        self.cur_page = INSTRUCTION_0
+        self.fps = FPSCounter()
     
     def setup(self):
         self.background = arcade.load_texture("images/bg.png")
@@ -52,9 +60,8 @@ class ImNotPopcorn(arcade.Window):
         self.wingmans = self.init_wingman()
         
         self.coin_score = ModelSprite('images/coin/coin_1.png', scale=0.4)
-        self.coin_score.append_texture(arcade.load_texture('images/coin/coin_2.png'))
-        self.coin_score.append_texture(arcade.load_texture('images/coin/coin_3.png'))
-        self.coin_score.append_texture(arcade.load_texture('images/coin/coin_4.png'))
+        for i in range(2, 5):
+            self.coin_score.append_texture(arcade.load_texture(f'images/coin/coin_{i}.png'))
 
         self.timeCount = time.time()
         self.cur_texture = 0
@@ -79,9 +86,8 @@ class ImNotPopcorn(arcade.Window):
         coins_lst = []
         for coin in self.world.lv1.coins:
             c = ModelSprite('images/coin/coin_1.png', model=coin, scale=SCALE)
-            c.append_texture(arcade.load_texture('images/coin/coin_2.png'))
-            c.append_texture(arcade.load_texture('images/coin/coin_3.png'))
-            c.append_texture(arcade.load_texture('images/coin/coin_4.png'))
+            for i in range(2, 5):
+                c.append_texture(arcade.load_texture(f'images/coin/coin_{i}.png'))
             coins_lst.append(c)
         return coins_lst
 
@@ -97,9 +103,6 @@ class ImNotPopcorn(arcade.Window):
         return cp
     
     def draw_score(self):
-        self.coin_score.append_texture(arcade.load_texture('images/coin/coin_2.png'))
-        self.coin_score.append_texture(arcade.load_texture('images/coin/coin_3.png'))
-        self.coin_score.append_texture(arcade.load_texture('images/coin/coin_4.png'))
         self.coin_score.set_position(50, SCREEN_HEIGHT + self.view_bottom - 50)
         x = arcade.Sprite('images/score/times.png')
         x.set_position(90, SCREEN_HEIGHT + self.view_bottom - 50)
@@ -110,6 +113,7 @@ class ImNotPopcorn(arcade.Window):
             char.draw()
         x.draw()
         self.coin_score.draw()
+        arcade.draw_text(str(self.world.level), SCREEN_WIDTH - 50, SCREEN_HEIGHT + self.view_bottom - 50, arcade.color.RED, 20)
 
     def draw_heart_bar(self):
         sp1 = ['images/heart1.png', 'images/heart_empty1.png', 'images/heart_empty1.png']
@@ -137,10 +141,8 @@ class ImNotPopcorn(arcade.Window):
         wingmans = []
         for e in self.world.lv1.wingman:
             wm = ModelSprite('images/enemy/wingman1.png', model=e)
-            wm.append_texture(arcade.load_texture('images/enemy/wingman2.png'))
-            wm.append_texture(arcade.load_texture('images/enemy/wingman3.png'))
-            wm.append_texture(arcade.load_texture('images/enemy/wingman4.png'))
-            wm.append_texture(arcade.load_texture('images/enemy/wingman5.png'))
+            for i in range(2, 6):
+                wm.append_texture(arcade.load_texture(f'images/enemy/wingman{i}.png'))
             wingmans.append(wm)
         return wingmans
     
@@ -180,6 +182,13 @@ class ImNotPopcorn(arcade.Window):
         arcade.draw_rectangle_filled(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, 
                                      SCREEN_WIDTH, SCREEN_HEIGHT + self.view_bottom, arcade.color.BABY_BLUE)
         arcade.draw_text('PRESS ENTER TO RESTART', 200, 500, arcade.color.BLACK, 20)
+    
+    def draw_instruction(self):
+        arcade.set_viewport(0, SCREEN_WIDTH, self.view_bottom, 
+                        SCREEN_HEIGHT + self.view_bottom)
+        arcade.draw_rectangle_filled(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, 
+                                     SCREEN_WIDTH, SCREEN_HEIGHT + self.view_bottom, arcade.color.BABY_BLUE)
+        arcade.draw_text('HOW TO PLAY', 200, 500, arcade.color.BLACK, 20)
 
     def draw_game_over(self):
         self.view_bottom = 0
@@ -224,11 +233,31 @@ class ImNotPopcorn(arcade.Window):
         self.checkpoint = self.init_checkpoint()
         self.wingmans = self.init_wingman()
 
+    def change_viewport(self):
+        changed = False
+
+        top_bndry = self.view_bottom + SCREEN_HEIGHT - VIEWPORT_MARGIN
+        if self.mrcorn_sprite.top() > top_bndry:
+            self.view_bottom += self.mrcorn_sprite.top() - top_bndry
+            changed = True
+
+        if changed:
+            arcade.set_viewport(0, SCREEN_WIDTH, self.view_bottom, 
+                                SCREEN_HEIGHT + self.view_bottom)
+            if self.fire_sprite.model.top() < self.view_bottom:
+                self.fire_sprite.model.y = self.view_bottom - 200
+
     def on_key_press(self, key, key_modifiers):
         self.world.on_key_press(key, key_modifiers)
-        if key == arcade.key.ENTER and self.world.state == World.STILL:
+        if key == arcade.key.ENTER and self.cur_page == INSTRUCTION_0:
+            self.cur_page = RUNNING
             self.world.state = World.START
-        if key == arcade.key.SPACE and self.world.state == World.GAME_OVER:
+        elif key == arcade.key.RIGHT and self.cur_page == INSTRUCTION_0:
+            self.cur_page = INSTRUCTION_1
+        elif key == arcade.key.ENTER and self.cur_page == INSTRUCTION_1:
+            self.cur_page = RUNNING
+            self.world.state = World.START
+        elif key == arcade.key.SPACE and self.world.state == World.GAME_OVER:
             self.world.restart()
             self.n = 1
             self.coin_list = self.init_coin()
@@ -243,36 +272,26 @@ class ImNotPopcorn(arcade.Window):
         self.world.on_key_release(key, key_modifiers)
     
     def update(self, delta):
-        changed = False
         self.world.update(delta)
+        self.change_viewport()
 
         if time.time() - self.timeCount > 0.3:
             self.sprite_move()
 
-        top_bndry = self.view_bottom + SCREEN_HEIGHT - VIEWPORT_MARGIN
-        if self.mrcorn_sprite.top() > top_bndry:
-            self.view_bottom += self.mrcorn_sprite.top() - top_bndry
-            changed = True
-
-        if changed:
-            arcade.set_viewport(0, SCREEN_WIDTH, self.view_bottom, 
-                                SCREEN_HEIGHT + self.view_bottom)
-            if self.fire_sprite.model.top() < self.view_bottom:
-                self.fire_sprite.model.y = self.view_bottom - 200
-
     def on_draw(self):
         arcade.start_render()
-        if self.world.state == World.STILL:
+        if self.cur_page == INSTRUCTION_0:
             self.draw_start()
+        elif self.cur_page == INSTRUCTION_1:
+            self.draw_instruction()
         elif self.world.state == World.GAME_OVER:
             self.draw_game_over()
-        else:
+        elif self.cur_page == RUNNING:
             if self.world.state == World.PASS:
                 self.next_level()
             self.draw_game()
             self.draw_score()
             self.draw_heart_bar()
-            arcade.draw_text(str(self.world.level), SCREEN_WIDTH - 50, SCREEN_HEIGHT + self.view_bottom - 50, arcade.color.RED, 20)
 
 def main():
     window = ImNotPopcorn(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)

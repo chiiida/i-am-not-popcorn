@@ -54,12 +54,6 @@ class MrCorn(Model):
     def bottom(self):
         return self.y - 100
     
-    def left(self):
-        return self.x - 25
-    
-    def right(self):
-        return self.x + 25
-    
     def set_platform(self, platform):
         self.is_jump = False
         self.platform = platform
