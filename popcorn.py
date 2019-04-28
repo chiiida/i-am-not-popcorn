@@ -44,14 +44,18 @@ class ImNotPopcorn(arcade.Window):
         self.cur_page = INSTRUCTION_0
     
     def setup(self):
-        self.background = arcade.load_texture("images/bg.png")
+        self.background = arcade.load_texture("images/bg1.png")
+        self.start_page = arcade.Sprite('images/start.png', scale=SCALE)
+        self.start_page.append_texture(arcade.load_texture('images/start2.png'))
+        self.instr = arcade.Sprite('images/instr1.png', scale=SCALE)
+        self.instr.append_texture(arcade.load_texture('images/instr2.png'))
         self.view_bottom = 0
         self.n = 1
     
         self.world = World(SCREEN_WIDTH, SCREEN_HEIGHT)
         self.mrcorn_sprite = ModelSprite('images/mrcorn.png', model=self.world.mrcorn, scale=SCALE)
         
-        self.fire_sprite = ModelSprite('images/fire1.png', model=self.world.fire, scale=SCALE)
+        self.fire_sprite = ModelSprite('images/fire2.png', model=self.world.fire, scale=SCALE)
         self.fire_sprite.append_texture(arcade.load_texture('images/fire21.png'))
         
         self.coin_list = self.init_coin()
@@ -158,6 +162,8 @@ class ImNotPopcorn(arcade.Window):
             self.fire_sprite.set_texture(1)
             self.checkpoint.set_texture(2)
             self.coin_score.set_texture(3)
+            self.start_page.set_texture(1)
+            self.instr.set_texture(1)
             for c in self.coin_list:
                 c.set_texture(3)
             for wm in self.wingmans:
@@ -167,6 +173,8 @@ class ImNotPopcorn(arcade.Window):
             self.fire_sprite.set_texture(0)
             self.checkpoint.set_texture(0)
             self.coin_score.set_texture(0)
+            self.start_page.set_texture(0)
+            self.instr.set_texture(0)
             for c in self.coin_list:
                 c.set_texture(0)
             for wm in self.wingmans:
@@ -175,18 +183,12 @@ class ImNotPopcorn(arcade.Window):
         self.timeCount = time.time()
     
     def draw_start(self):
-        arcade.set_viewport(0, SCREEN_WIDTH, self.view_bottom, 
-                        SCREEN_HEIGHT + self.view_bottom)
-        arcade.draw_rectangle_filled(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, 
-                                     SCREEN_WIDTH, SCREEN_HEIGHT + self.view_bottom, arcade.color.BABY_BLUE)
-        arcade.draw_text('PRESS ENTER TO RESTART', 200, 500, arcade.color.BLACK, 20)
+        self.start_page.set_position(SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
+        self.start_page.draw()
     
     def draw_instruction(self):
-        arcade.set_viewport(0, SCREEN_WIDTH, self.view_bottom, 
-                        SCREEN_HEIGHT + self.view_bottom)
-        arcade.draw_rectangle_filled(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, 
-                                     SCREEN_WIDTH, SCREEN_HEIGHT + self.view_bottom, arcade.color.BABY_BLUE)
-        arcade.draw_text('HOW TO PLAY', 200, 500, arcade.color.BLACK, 20)
+        self.instr.set_position(SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
+        self.instr.draw()
 
     def draw_game_over(self):
         self.view_bottom = 0

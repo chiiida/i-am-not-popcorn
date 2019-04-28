@@ -14,7 +14,7 @@ DIR_OFFSETS = { DIR_STILL: (0,0),
                 DIR_RIGHT: (1,0),
                 DIR_LEFT: (-1,0) }
 
-JUMP_SPEED = 18
+JUMP_SPEED = 17
 GRAVITY = -1
 PLAYER_MARGIN = 50
 
@@ -122,8 +122,8 @@ class Fire:
     def top(self):
         return self.y + self.height//2
     
-    def update_level(self, lv):
-        self.level += (lv-1)/4
+    def update_level(self):
+        self.level += (self.world.level-1)/4
 
     def update(self, delta):
         self.y += self.level
@@ -328,7 +328,7 @@ class World:
         self.fire.x = self.width//2
         self.fire.y = -500 - (self.level * 100)
         self.level += 1
-        self.fire.update_level(self.level)
+        self.fire.update_level()
     
     def restart(self):
         self.lv1.setup()
@@ -337,6 +337,7 @@ class World:
         self.mrcorn.y = 150
         self.mrcorn.heart_count = 3
         self.mrcorn.score = 0
+        self.fire.level = 1
         self.fire.x = self.width//2
         self.fire.y = -500 - (self.level * 100)
 
