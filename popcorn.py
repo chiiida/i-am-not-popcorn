@@ -107,11 +107,11 @@ class ImNotPopcorn(arcade.Window):
     
     def draw_score(self):
         self.coin_score.set_position(50, SCREEN_HEIGHT + self.view_bottom - 50)
-        x = arcade.Sprite('images/score/times.png')
+        x = arcade.Sprite('images/score/times.png', scale=0.3)
         x.set_position(90, SCREEN_HEIGHT + self.view_bottom - 50)
         score = str(self.world.mrcorn.score)
         for i in range(len(score)):
-            char = arcade.Sprite(f'images/score/{int(score[i])}.png')
+            char = arcade.Sprite(f'images/score/{int(score[i])}.png', scale=0.3)
             char.set_position(100+(i+1)*20, SCREEN_HEIGHT + self.view_bottom - 50)
             char.draw()
         x.draw()
