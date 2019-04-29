@@ -116,7 +116,6 @@ class ImNotPopcorn(arcade.Window):
             char.draw()
         x.draw()
         self.coin_score.draw()
-        arcade.draw_text(str(self.world.level), SCREEN_WIDTH - 50, SCREEN_HEIGHT + self.view_bottom - 50, arcade.color.RED, 20)
 
     def draw_heart_bar(self):
         sp1 = ['images/heart1.png', 'images/heart_empty1.png', 'images/heart_empty1.png']
@@ -134,6 +133,18 @@ class ImNotPopcorn(arcade.Window):
             h.center_y = SCREEN_HEIGHT + self.view_bottom - 90
             h.draw()
             n += 1
+    
+    def draw_label(self):
+        label = arcade.Sprite('images/label/label.png', scale=0.2)
+        label.set_position(SCREEN_WIDTH - 60, SCREEN_HEIGHT + self.view_bottom - 50)
+        label.draw()
+        for i in range(len(str(self.world.level))):
+            char = arcade.Sprite(f'images/label/{str(self.world.level)[i-1]}.png', scale=0.2)
+            if self.world.level > 9:
+                char.set_position(SCREEN_WIDTH - (62+((i-1)*11)), SCREEN_HEIGHT + self.view_bottom - 50)
+            else:
+                char.set_position(SCREEN_WIDTH - 60, SCREEN_HEIGHT + self.view_bottom - 50)
+            char.draw()
 
     def draw_spikes(self):
         for sp in self.world.lv1.spikes:
@@ -199,7 +210,7 @@ class ImNotPopcorn(arcade.Window):
         arcade.draw_text('PRESS SPACE TO RESTART', 200, 500, arcade.color.BLACK, 20)
         score = str(self.world.mrcorn.score)
         for i in range(len(score)):
-            char = arcade.Sprite(f'images/score/{int(score[i])}.png')
+            char = arcade.Sprite(f'images/score/{int(score[i])}.png', scale=0.4)
             char.set_position(SCREEN_WIDTH//2+(i+1)*20, (SCREEN_HEIGHT + self.view_bottom)//2)
             char.draw()
     
@@ -291,6 +302,7 @@ class ImNotPopcorn(arcade.Window):
                 self.next_level()
             self.draw_game()
             self.draw_score()
+            self.draw_label()
             self.draw_heart_bar()
 
 def main():
