@@ -205,13 +205,26 @@ class ImNotPopcorn(arcade.Window):
         self.view_bottom = 0
         arcade.set_viewport(0, SCREEN_WIDTH, self.view_bottom, 
                         SCREEN_HEIGHT + self.view_bottom)
-        arcade.draw_rectangle_filled(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, 
-                                     SCREEN_WIDTH, SCREEN_HEIGHT + self.view_bottom, arcade.color.BABY_BLUE)
-        arcade.draw_text('PRESS SPACE TO RESTART', 200, 500, arcade.color.BLACK, 20)
+        bg = arcade.Sprite('images/gameover/gameover_page.png', scale=SCALE)
+        bg.set_position(SCREEN_WIDTH//2, SCREEN_HEIGHT//2)
+        bg.draw()
+
+        self.coin_score.set_position(SCREEN_WIDTH//2 + 15, SCREEN_HEIGHT//2 + 140)
+        self.coin_score.draw()
+
         score = str(self.world.mrcorn.score)
         for i in range(len(score)):
-            char = arcade.Sprite(f'images/score/{int(score[i])}.png', scale=0.4)
-            char.set_position(SCREEN_WIDTH//2+(i+1)*20, (SCREEN_HEIGHT + self.view_bottom)//2)
+            char = arcade.Sprite(f'images/gameover/scorenum{int(score[i])}.png', scale=SCALE)
+            char.set_position(SCREEN_WIDTH//2+(i)*35, (SCREEN_HEIGHT + self.view_bottom)//2)
+            char.draw()
+
+        level = str(self.world.level)
+        for i in range(len(level)):
+            char = arcade.Sprite(f'images/gameover/levelnum{str(level[i])}.png', scale=SCALE)
+            if self.world.level > 9:
+                char.set_position(SCREEN_WIDTH//2 + (i)*35, SCREEN_HEIGHT//2)
+            else:
+                char.set_position(SCREEN_WIDTH//2, SCREEN_HEIGHT//2)
             char.draw()
     
     def draw_game(self):
@@ -268,7 +281,7 @@ class ImNotPopcorn(arcade.Window):
         elif key == arcade.key.ENTER and self.cur_page == INSTRUCTION_1:
             self.cur_page = RUNNING
             self.world.state = World.START
-        elif key == arcade.key.SPACE and self.world.state == World.GAME_OVER:
+        elif key == arcade.key.ENTER and self.world.state == World.GAME_OVER:
             self.world.restart()
             self.n = 1
             self.coin_list = self.init_coin()
