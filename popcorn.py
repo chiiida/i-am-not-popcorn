@@ -16,6 +16,8 @@ INSTRUCTION_0 = 1
 INSTRUCTION_1 = 2
 RUNNING = 3
 
+arcade.check_for_collision
+
 class ModelSprite(arcade.Sprite):
     def __init__(self, *args, **kwargs):
         self.model = kwargs.pop('model', None)
@@ -46,9 +48,12 @@ class ImNotPopcorn(arcade.Window):
     def setup(self):
         self.background = arcade.load_texture("images/bg1.png")
         self.start_page = arcade.Sprite('images/start.png', scale=SCALE)
-        self.start_page.append_texture(arcade.load_texture('images/start2.png'))
+        self.start_page.append_texture(arcade.load_texture('images/start2.png', scale=SCALE))
         self.instr = arcade.Sprite('images/instr1.png', scale=SCALE)
-        self.instr.append_texture(arcade.load_texture('images/instr2.png'))
+        self.instr.append_texture(arcade.load_texture('images/instr2.png', scale=SCALE))
+        self.dead_scene = arcade.Sprite('images/gameover/die3.png', scale=SCALE)
+        for i in range(4, 5):
+            self.dead_scene.append_texture(arcade.load_texture(f'images/gameover/die{i}.png', scale=SCALE))
         self.view_bottom = 0
         self.n = 1
     
@@ -56,7 +61,7 @@ class ImNotPopcorn(arcade.Window):
         self.mrcorn_sprite = ModelSprite('images/mrcorn.png', model=self.world.mrcorn, scale=SCALE)
         
         self.fire_sprite = ModelSprite('images/fire2.png', model=self.world.fire, scale=SCALE)
-        self.fire_sprite.append_texture(arcade.load_texture('images/fire21.png'))
+        self.fire_sprite.append_texture(arcade.load_texture('images/fire21.png', scale=SCALE))
         
         self.coin_list = self.init_coin()
         self.checkpoint = self.init_checkpoint()
@@ -64,14 +69,14 @@ class ImNotPopcorn(arcade.Window):
         
         self.coin_score = ModelSprite('images/coin/coin_1.png', scale=0.4)
         for i in range(2, 5):
-            self.coin_score.append_texture(arcade.load_texture(f'images/coin/coin_{i}.png'))
+            self.coin_score.append_texture(arcade.load_texture(f'images/coin/coin_{i}.png', scale=0.4))
 
         self.timeCount = time.time()
         self.cur_texture = 0
 
     def init_level(self, lv):
         self.fire_sprite = ModelSprite('images/fire1.png', model=lv.fire, scale=SCALE)
-        self.fire_sprite.append_texture(arcade.load_texture('images/fire21.png'))
+        self.fire_sprite.append_texture(arcade.load_texture('images/fire21.png', scale=SCALE))
         self.coin_list = self.init_coin(lv.coins)
         self.checkpoint = self.init_checkpoint(lv.checkpoint)
 
@@ -90,7 +95,7 @@ class ImNotPopcorn(arcade.Window):
         for coin in self.world.lv1.coins:
             c = ModelSprite('images/coin/coin_1.png', model=coin, scale=SCALE)
             for i in range(2, 5):
-                c.append_texture(arcade.load_texture(f'images/coin/coin_{i}.png'))
+                c.append_texture(arcade.load_texture(f'images/coin/coin_{i}.png', scale=SCALE))
             coins_lst.append(c)
         return coins_lst
 
@@ -155,7 +160,7 @@ class ImNotPopcorn(arcade.Window):
         wingmans = []
         for e in self.world.lv1.wingman:
             wm = ModelSprite('images/enemy/red1.png', model=e, scale=SCALE)
-            wm.append_texture(arcade.load_texture(f'images/enemy/red2.png'))
+            wm.append_texture(arcade.load_texture(f'images/enemy/red2.png', scale=SCALE))
             wingmans.append(wm)
         return wingmans
     
@@ -175,6 +180,7 @@ class ImNotPopcorn(arcade.Window):
             self.coin_score.set_texture(3)
             self.start_page.set_texture(1)
             self.instr.set_texture(1)
+            self.dead_scene.set_texture(1)
             for c in self.coin_list:
                 c.set_texture(3)
             for wm in self.wingmans:
@@ -186,6 +192,7 @@ class ImNotPopcorn(arcade.Window):
             self.coin_score.set_texture(0)
             self.start_page.set_texture(0)
             self.instr.set_texture(0)
+            self.dead_scene.set_texture(0)
             for c in self.coin_list:
                 c.set_texture(0)
             for wm in self.wingmans:
@@ -208,7 +215,10 @@ class ImNotPopcorn(arcade.Window):
         bg = arcade.Sprite('images/gameover/gameover_page.png', scale=SCALE)
         bg.set_position(SCREEN_WIDTH//2, SCREEN_HEIGHT//2)
         bg.draw()
+        self.dead_scene.set_position(SCREEN_WIDTH//2, SCREEN_HEIGHT//2)
+        self.dead_scene.draw()
 
+        self.coin_score.scale = 0.5
         self.coin_score.set_position(SCREEN_WIDTH//2 + 15, SCREEN_HEIGHT//2 + 140)
         self.coin_score.draw()
 
@@ -299,13 +309,13 @@ class ImNotPopcorn(arcade.Window):
         self.world.update(delta)
         self.change_viewport()
 
-        if time.time() - self.timeCount > 0.3:
+        if time.time() - self.timeCount > 0.4:
             self.sprite_move()
 
     def on_draw(self):
         arcade.start_render()
         if self.cur_page == INSTRUCTION_0:
-            self.draw_start()
+            self.draw_start()   
         elif self.cur_page == INSTRUCTION_1:
             self.draw_instruction()
         elif self.world.state == World.GAME_OVER:
