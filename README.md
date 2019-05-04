@@ -1,6 +1,6 @@
 # I AM NOT POPCORN!
 
-![alt text](https://raw.githubusercontent.com/llleyelll/i-am-not-pop-corn/master/images/logo.png)
+![alt text](https://raw.githubusercontent.com/llleyelll/i-am-not-popcorn/master/images/logo.png)
 
     Mr. Corn tries not to be popcorn.
 
@@ -11,7 +11,7 @@
     Mr. Corn tries to avoid fire. Otherwise, he will become popcorn!
     
     The goal of this game is to pass level as many as you can.
-    While avoid fire and collect some items.
+    While avoid fire and collecting some items.
 
 **To play this game**
 
