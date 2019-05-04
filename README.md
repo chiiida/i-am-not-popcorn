@@ -1,6 +1,6 @@
 # I AM NOT POPCORN!
 
-![alt text](https://raw.githubusercontent.com/llleyelll/i-am-not-pop-corn/master/images/logo.png)
+![alt text](https://raw.githubusercontent.com/llleyelll/i-am-not-popcorn/master/images/logo.png)
 
     Mr. Corn tries not to be popcorn.
 
