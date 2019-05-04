@@ -1,6 +1,5 @@
 import arcade
-from models import World, MrCorn
-import collections
+from models import *
 import random
 import time
 
@@ -15,8 +14,6 @@ GAME_OVER = 0
 INSTRUCTION_0 = 1
 INSTRUCTION_1 = 2
 RUNNING = 3
-
-arcade.check_for_collision
 
 class ModelSprite(arcade.Sprite):
     def __init__(self, *args, **kwargs):
@@ -67,9 +64,9 @@ class ImNotPopcorn(arcade.Window):
         self.checkpoint = self.init_checkpoint()
         self.wingmans = self.init_wingman()
         
-        self.coin_score = ModelSprite('images/coin/coin_1.png', scale=0.4)
+        self.coin_score = arcade.Sprite('images/score/coin_1.png', scale=0.4)
         for i in range(2, 5):
-            self.coin_score.append_texture(arcade.load_texture(f'images/coin/coin_{i}.png', scale=0.4))
+            self.coin_score.append_texture(arcade.load_texture(f'images/score/coin_{i}.png', scale=0.4))
 
         self.timeCount = time.time()
         self.cur_texture = 0
