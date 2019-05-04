@@ -11,7 +11,7 @@
     Mr. Corn tries to avoid fire. Otherwise, he will become popcorn!
     
     The goal of this game is to pass level as many as you can.
-    While avoid fire and collect some items.
+    While avoid fire and collecting some items.
 
 **To play this game**
 
