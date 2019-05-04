@@ -1,6 +1,13 @@
-# i-am-not-popcorn
-SuperCorn try not to be Popcorn
+# I AM NOT POPCORN!
 
-SKE first year/second semester project
+    Mr. Corn tries not to be popcorn.
 
-รีบๆเสร็จได้ไหมคนดี
+    A 2D platform games create with Python and Arcade library.
+
+# Idea of game
+
+    Mr. Corn tries to avoid fire. Otherwise, he will become popcorn!
+
+# To play this game
+
+    You have to install Python and Arcade library, then clone the game.
