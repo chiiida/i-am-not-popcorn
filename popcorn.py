@@ -24,16 +24,68 @@ class ModelSprite(arcade.Sprite):
     def sync_with_model(self):
         if self.model:
             self.set_position(self.model.x, self.model.y)
-    
+
+    def draw(self):
+        self.sync_with_model()
+        super().draw()
+
+class Player(arcade.Sprite):
+
+    def __init__(self, *args, **kwargs):
+        self.model = kwargs.pop('model', None)
+ 
+        super().__init__(*args, **kwargs)
+
+        self.x_lst = [self.center_x]
+        texture = arcade.load_texture("images/mrcorn1.png", mirrored=True, scale=SCALE)
+        self.textures.append(texture)
+        texture = arcade.load_texture("images/mrcorn2.png", mirrored=True, scale=SCALE)
+        self.textures.append(texture)
+        texture = arcade.load_texture("images/mrcorn1.png", scale=SCALE)
+        self.textures.append(texture)
+        texture = arcade.load_texture("images/mrcorn2.png", scale=SCALE)
+        self.textures.append(texture)
+
+        self.set_texture(0)
+        self.timeCount = time.time()
+        self.cur_texture = 0
+
     def top(self):
         return self.model.y + 100
     
     def bottom(self):
         return self.model.y - 100
 
+    def sync_with_model(self):
+        if self.model:
+            self.set_position(self.model.x, self.model.y)
+    
     def draw(self):
         self.sync_with_model()
         super().draw()
+    
+    def sprite_move(self, n):
+        if self.cur_texture == 0:
+            self.set_texture(n)
+            self.cur_texture = 1
+        else:
+            self.set_texture(n - 1)
+            self.cur_texture = 0
+        self.timeCount = time.time()
+
+    def update(self, delta):
+        if self.center_x != self.x_lst[0]:
+            self.x_lst.append(self.center_x)
+        
+        if time.time() - self.timeCount > 0.4:
+            if len(self.x_lst) > 1:
+                if self.x_lst[-1] < self.x_lst[-2]:
+                    self.set_texture(0)
+                    self.sprite_move(1)
+                if self.x_lst[-1] > self.x_lst[-2]:
+                    self.set_texture(2)
+                    self.sprite_move(3)
+                self.x_lst.remove(self.x_lst[0])
 
 class ImNotPopcorn(arcade.Window):
     def __init__(self, width, height, title):
@@ -49,13 +101,12 @@ class ImNotPopcorn(arcade.Window):
         self.instr = arcade.Sprite('images/instr1.png', scale=SCALE)
         self.instr.append_texture(arcade.load_texture('images/instr2.png', scale=SCALE))
         self.dead_scene = arcade.Sprite('images/gameover/die3.png', scale=SCALE)
-        for i in range(4, 5):
-            self.dead_scene.append_texture(arcade.load_texture(f'images/gameover/die{i}.png', scale=SCALE))
+        self.dead_scene.append_texture(arcade.load_texture(f'images/gameover/die4.png', scale=SCALE))
         self.view_bottom = 0
         self.n = 1
     
         self.world = World(SCREEN_WIDTH, SCREEN_HEIGHT)
-        self.mrcorn_sprite = ModelSprite('images/mrcorn.png', model=self.world.mrcorn, scale=SCALE)
+        self.mrcorn_sprite = Player(model=self.world.mrcorn)
         
         self.fire_sprite = ModelSprite('images/fire2.png', model=self.world.fire, scale=SCALE)
         self.fire_sprite.append_texture(arcade.load_texture('images/fire21.png', scale=SCALE))
@@ -304,6 +355,7 @@ class ImNotPopcorn(arcade.Window):
     
     def update(self, delta):
         self.world.update(delta)
+        self.mrcorn_sprite.update(delta)
         self.change_viewport()
 
         if time.time() - self.timeCount > 0.4:
