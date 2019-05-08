@@ -15,4 +15,4 @@
 
 **To play this game**
 
-    You have to install Python and Arcade library, then clone the game.
+    Install Python and Arcade library, then clone the game.
