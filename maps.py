@@ -9,7 +9,7 @@ map_pool = ['....#...',
             '..##....',
             '...##...',
             '..###...',
-            '.###....',]
+            '.###....', ]
 
 def check_platform(pf, p):
     count = 0
@@ -35,7 +35,7 @@ def random_coin(lst):
     coin_list = []
     for i in range(40):
         p = random.choice(lst)
-        if p.avaliable == True:
+        if p.avaliable:
             p.item_on()
             c = [p.x, p.y + 105]
             index = lst.index(p)

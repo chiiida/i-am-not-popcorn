@@ -18,12 +18,48 @@ JUMP_SPEED = 17
 GRAVITY = -1
 PLAYER_MARGIN = 50
 
+class Sound:
+    def __init__(self, world):
+        self.world = world
+
+        self.jump = arcade.load_sound('sounds/jump.wav')
+        self.picked_item = arcade.load_sound('sounds/collect.wav')
+        self.picked_coin = arcade.load_sound('sounds/picked-coin.wav')
+        self.hited = arcade.load_sound('sounds/die.wav')
+        self.level_comp = arcade.load_sound('sounds/level-complete.wav')
+
+        self.start_game = arcade.load_sound('sounds/start-game.wav')
+        self.gameover = arcade.load_sound('sounds/game-over.wav')
+    
+    def play(self, sound):
+        arcade.play_sound(sound)
+    
+    def start_game(self):
+        self.play(self.start_game)
+
+    def level_pass(self):
+        self.play(self.level_comp)
+
+    def coin_sound(self):
+        self.play(self.picked_coin)
+    
+    def item_sound(self):
+        self.play(self.picked_item)
+    
+    def game_over(self):
+        self.play(self.gameover)
+
+    def hit_sound(self):
+        if self.world.state == World.DEAD:
+            self.play(self.hited)
+
 class Model:
     def __init__(self, world, x, y, angle):
         self.world = world
         self.x = x
         self.y = y
         self.angle = 0
+
 
 class MrCorn(Model):
     def __init__(self, world, x, y):
@@ -128,6 +164,7 @@ class Fire:
     def update(self, delta):
         self.y += self.level
 
+
 class Platform:
     def __init__(self, world, x, y, width, height):
         self.world = world
@@ -146,6 +183,7 @@ class Platform:
     def item_on(self):
         self.avaliable = False
 
+
 class Item:
     ITEM_HIT_MARGIN = 30
 
@@ -159,6 +197,7 @@ class Item:
         return ((abs(self.x - mrcorn.x) < Item.ITEM_HIT_MARGIN) and
                 (abs(self.y - mrcorn.y) < Item.ITEM_HIT_MARGIN))
 
+
 class Level:
     def __init__(self, world, player, width, height):
         self.world = world
@@ -167,6 +206,8 @@ class Level:
         self.height = height
 
         self.setup()
+
+        self.sound = Sound(self.world)
 
     def setup(self):
         self.map = random_map()
@@ -244,34 +285,37 @@ class Level:
             if not c.is_collected and c.collected(self.player):
                 c.is_collected = True
                 self.player.score += 100
-    
-    def kill_item(self, lst):
-        for t in lst:
-            if t.is_collected:
-                index = lst.index(t)
-                lst.pop(index)
+                self.sound.coin_sound()
     
     def collect_heart(self):
         for h in self.heart:
             if not h.is_collected and h.collected(self.player):
                 h.is_collected = True
+                self.sound.item_sound()
                 if self.player.heart_count < 3:
                     self.player.heart_count += 1
+    
+    def collect_item(self):
+        t = self.items[0]
+        if not t.is_collected and t.collected(self.player):
+            t.is_collected = True
+            self.sound.item_sound()
+            if self.item_no%2 == 0:
+                self.player.y += 500
+                self.player.jump()
+            elif self.item_no%2 != 0:
+                self.player.score += 1000
     
     def hit_spikes(self, enemies):
         for sp in enemies:
             if not sp.is_collected and sp.collected(self.player):
                 self.world.state = World.DEAD
     
-    def collect_item(self):
-        t = self.items[0]
-        if not t.is_collected and t.collected(self.player):
-            t.is_collected = True
-            if self.item_no%2 == 0:
-                self.player.y += 500
-                self.player.jump()
-            elif self.item_no%2 != 0:
-                self.player.score += 1000
+    def kill_item(self, lst):
+        for t in lst:
+            if t.is_collected:
+                index = lst.index(t)
+                lst.pop(index)
 
     def at_check_point(self):
         return self.checkpoint.x - 40 == self.player.x and self.checkpoint.y == self.player.y
@@ -285,6 +329,7 @@ class Level:
         self.hit_spikes(self.wingman)
         self.collect_item()
         self.kill_item(self.items)
+
 
 class World:
     START = 0
@@ -301,6 +346,8 @@ class World:
         self.mrcorn = MrCorn(self, 100, 150)
         self.fire = Fire(self, self.width//2, -500, self.width, self.height, self.level)
         self.lv1 = Level(self, self.mrcorn, 700, 800)
+
+        self.sound = Sound(self)
 
     def move_near_platform(self):
         for p in self.lv1.platforms:
@@ -352,22 +399,32 @@ class World:
     def on_key_release(self, key, modifiers):
         if key == arcade.key.LEFT or key == arcade.key.RIGHT:
             self.mrcorn.direction = DIR_STILL
+    
+    def sound_on_key_press(self, key, key_modifiers):
+        if key == arcade.key.SPACE and self.state == World.START:
+            self.sound.play(self.sound.jump)
+
+    def start_update(self, delta):
+        self.is_dead()
+        self.next_level()
+        self.mrcorn.update(delta)
+        self.fire.update(delta)
+        self.lv1.update(delta)
 
     def update(self, delta):
         self.game_over()
         if self.state == World.START:
-            self.is_dead()
-            self.next_level()
-            self.mrcorn.update(delta)
-            self.fire.update(delta)
-            self.lv1.update(delta)
+            self.start_update(delta)
         elif self.state == World.PASS:
             self.pass_level()
+            self.sound.level_pass()
             self.state = World.START
         elif self.state == World.DEAD:
             self.mrcorn.heart_count -= 1
             if self.mrcorn.heart_count > 0:
+                self.sound.hit_sound()
                 self.state = World.START
                 self.move_near_platform()
             else:
+                self.sound.game_over()
                 self.state = World.GAME_OVER

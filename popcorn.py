@@ -15,6 +15,7 @@ INSTRUCTION_0 = 1
 INSTRUCTION_1 = 2
 RUNNING = 3
 
+
 class ModelSprite(arcade.Sprite):
     def __init__(self, *args, **kwargs):
         self.model = kwargs.pop('model', None)
@@ -28,6 +29,7 @@ class ModelSprite(arcade.Sprite):
     def draw(self):
         self.sync_with_model()
         super().draw()
+
 
 class Player(arcade.Sprite):
 
@@ -86,6 +88,7 @@ class Player(arcade.Sprite):
                     self.set_texture(2)
                     self.sprite_move(3)
                 self.x_lst.remove(self.x_lst[0])
+
 
 class ImNotPopcorn(arcade.Window):
     def __init__(self, width, height, title):
@@ -314,6 +317,17 @@ class ImNotPopcorn(arcade.Window):
         self.coin_list = self.init_coin()
         self.checkpoint = self.init_checkpoint()
         self.wingmans = self.init_wingman()
+    
+    def restart_game(self):
+        self.world.restart()
+        self.n = 1
+        self.coin_list = self.init_coin()
+        self.checkpoint = self.init_checkpoint()
+        self.wingmans = self.init_wingman()
+        self.view_bottom = 0
+        arcade.set_viewport(0, SCREEN_WIDTH, self.view_bottom, 
+                            SCREEN_HEIGHT + self.view_bottom)
+        self.world.state = World.START
 
     def change_viewport(self):
         changed = False
@@ -331,29 +345,26 @@ class ImNotPopcorn(arcade.Window):
 
     def on_key_press(self, key, key_modifiers):
         self.world.on_key_press(key, key_modifiers)
-        if key == arcade.key.ENTER and self.cur_page == INSTRUCTION_0:
-            self.cur_page = RUNNING
-            self.world.state = World.START
+        self.world.sound_on_key_press(key, key_modifiers)
+        self.sound_on_key_press(key, key_modifiers)
+        if key == arcade.key.ENTER and self.world.state != World.GAME_OVER:
+            if self.cur_page == INSTRUCTION_0 or self.cur_page == INSTRUCTION_1:
+                self.cur_page = RUNNING
+                self.world.state = World.START
         elif key == arcade.key.RIGHT and self.cur_page == INSTRUCTION_0:
             self.cur_page = INSTRUCTION_1
-        elif key == arcade.key.ENTER and self.cur_page == INSTRUCTION_1:
-            self.cur_page = RUNNING
-            self.world.state = World.START
         elif key == arcade.key.ENTER and self.world.state == World.GAME_OVER:
-            self.world.restart()
-            self.n = 1
-            self.coin_list = self.init_coin()
-            self.checkpoint = self.init_checkpoint()
-            self.wingmans = self.init_wingman()
-            self.view_bottom = 0
-            arcade.set_viewport(0, SCREEN_WIDTH, self.view_bottom, 
-                            SCREEN_HEIGHT + self.view_bottom)
-            self.world.state = World.START
+            self.restart_game()
     
     def on_key_release(self, key, key_modifiers):
         self.world.on_key_release(key, key_modifiers)
+
+    def sound_on_key_press(self, key, key_modifiers):
+        if key == arcade.key.ENTER:
+            self.world.sound.play(self.world.sound.start_game)
     
     def update(self, delta):
+        self.set_update_rate(1/70)
         self.world.update(delta)
         self.mrcorn_sprite.update(delta)
         self.change_viewport()
@@ -376,6 +387,7 @@ class ImNotPopcorn(arcade.Window):
             self.draw_score()
             self.draw_label()
             self.draw_heart_bar()
+
 
 def main():
     window = ImNotPopcorn(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
