@@ -16,3 +16,7 @@
 **To play this game**
 
     Install Python and Arcade library, then clone the game.
+
+**Caution**
+
+    If you have problem running the game, please check your `FFmpeg` binary.
