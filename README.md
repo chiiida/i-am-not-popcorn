@@ -19,4 +19,4 @@
 
 **Caution**
 
-    If you have problem running the game, please check your `FFmpeg` binary.
+> If you have problem running the game, please check your `FFmpeg` binary.
