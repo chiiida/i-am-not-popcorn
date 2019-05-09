@@ -79,7 +79,7 @@ class Player(arcade.Sprite):
         if self.center_x != self.x_lst[0]:
             self.x_lst.append(self.center_x)
         
-        if time.time() - self.timeCount > 0.4:
+        if time.time() - self.timeCount > 0.2:
             if len(self.x_lst) > 1:
                 if self.x_lst[-1] < self.x_lst[-2]:
                     self.set_texture(0)
@@ -98,7 +98,6 @@ class ImNotPopcorn(arcade.Window):
         self.cur_page = INSTRUCTION_0
     
     def setup(self):
-        self.background = arcade.load_texture("images/bg1.png")
         self.start_page = arcade.Sprite('images/start.png', scale=SCALE)
         self.start_page.append_texture(arcade.load_texture('images/start2.png', scale=SCALE))
         self.instr = arcade.Sprite('images/instr1.png', scale=SCALE)
@@ -106,7 +105,7 @@ class ImNotPopcorn(arcade.Window):
         self.dead_scene = arcade.Sprite('images/gameover/die3.png', scale=SCALE)
         self.dead_scene.append_texture(arcade.load_texture(f'images/gameover/die4.png', scale=SCALE))
         self.view_bottom = 0
-        self.n = 1
+        self.n = 4
     
         self.world = World(SCREEN_WIDTH, SCREEN_HEIGHT)
         self.mrcorn_sprite = Player(model=self.world.mrcorn)
@@ -130,6 +129,11 @@ class ImNotPopcorn(arcade.Window):
         self.fire_sprite.append_texture(arcade.load_texture('images/fire21.png', scale=SCALE))
         self.coin_list = self.init_coin(lv.coins)
         self.checkpoint = self.init_checkpoint(lv.checkpoint)
+
+    def draw_bg(self):
+       bg = arcade.Sprite(f'images/bg/bg{self.n}.png', scale=SCALE)
+       bg.set_position(SCREEN_WIDTH//2, 6000//2)
+       bg.draw()
 
     def draw_platforms(self, platforms):
         i = 1
@@ -289,10 +293,9 @@ class ImNotPopcorn(arcade.Window):
             char.draw()
     
     def draw_game(self):
-        arcade.draw_rectangle_filled(SCREEN_WIDTH//2, SCREEN_HEIGHT + self.view_bottom//2, 
-                                     SCREEN_WIDTH, SCREEN_HEIGHT + self.view_bottom, arcade.color.BABY_BLUE)
-        arcade.draw_texture_rectangle(SCREEN_WIDTH // 2, 6000 // 2,
-                                      SCREEN_WIDTH, 6000, self.background)
+        # arcade.draw_texture_rectangle(SCREEN_WIDTH // 2, 6000 // 2,
+        #                               SCREEN_WIDTH, 6000, self.background)
+        self.draw_bg()
         self.draw_platforms(self.world.lv1.platforms)
         self.checkpoint.draw()
         self.draw_coin()
