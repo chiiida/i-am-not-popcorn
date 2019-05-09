@@ -105,7 +105,7 @@ class ImNotPopcorn(arcade.Window):
         self.dead_scene = arcade.Sprite('images/gameover/die3.png', scale=SCALE)
         self.dead_scene.append_texture(arcade.load_texture(f'images/gameover/die4.png', scale=SCALE))
         self.view_bottom = 0
-        self.n = 4
+        self.n = 1
     
         self.world = World(SCREEN_WIDTH, SCREEN_HEIGHT)
         self.mrcorn_sprite = Player(model=self.world.mrcorn)
