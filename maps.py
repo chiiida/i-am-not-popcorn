@@ -11,12 +11,14 @@ map_pool = ['....#...',
             '..###...',
             '.###....', ]
 
+
 def check_platform(pf, p):
     count = 0
     for i in range(len(p)):
         if p[i] == '#' and pf[i] == '#':
             count += 1
     return count == 0
+
 
 def random_map():
     map_init = ['$$$$$$$$',
@@ -30,6 +32,7 @@ def random_map():
         map_init.append(p)
     map_init.append('####....')
     return map_init
+
 
 def random_coin(lst):
     coin_list = []
