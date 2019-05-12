@@ -15,8 +15,8 @@
 
 **Dependencies**
 
-    Python
-    Arcade (2.0.0+) library
+`Python`
+`Arcade (2.0.0+) library`
 
 **Caution**
 
