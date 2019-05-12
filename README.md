@@ -13,9 +13,10 @@
     The goal of this game is to pass level as many as you can.
     While avoid fire and collecting some items.
 
-**To play this game**
+**Dependencies**
 
-    Install Python and Arcade (2.0.0+) library, then clone the game.
+    Python
+    Arcade (2.0.0+) library
 
 **Caution**
 
